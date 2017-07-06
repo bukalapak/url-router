@@ -7,7 +7,5 @@ import android.content.Context;
  */
 
 public interface Preparation {
-
     void prepare(Processor processor, Context context, Result result);
-
 }

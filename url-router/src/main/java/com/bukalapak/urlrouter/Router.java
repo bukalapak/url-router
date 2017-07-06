@@ -22,13 +22,11 @@ public class Router {
 
     private final static String TAG = "DeeplinkRouter";
 
-    private Context context;
     private List<Pair<String, Processor>> processors;
     private List<Pair<String, PreProcessor>> preProcessors;
     private Preparation preparation;
 
     public Router(Context context) {
-        this.context = context;
         this.processors = new ArrayList<>();
         this.preProcessors = new ArrayList<>();
     }
@@ -65,7 +63,7 @@ public class Router {
         }
     }
 
-    public boolean route(String url, Bundle args) {
+    public boolean route(Context context, String url, Bundle args) {
         String urlWithoutQuery = url;
         if (urlWithoutQuery.contains("?")) {
             urlWithoutQuery = urlWithoutQuery.split("\\?")[0];
@@ -88,7 +86,7 @@ public class Router {
                     Result result = new Result(url, variableMap, queryMap, args);
                     String processedUrl = preProcessorPair.second.proceed(context, result);
                     if (processedUrl != null) {
-                        return routeUrl(url, processedUrl, args);
+                        return routeUrl(context, url, processedUrl, args);
                     } else {
                         Log.i(TAG, "Routing url " + url + " using " + preProcessorPair.first);
                         return true;
@@ -98,11 +96,11 @@ public class Router {
             Log.e(TAG, "No route for url " + url);
             return false;
         } else {
-            return routeUrl(url, urlWithoutQuery, args);
+            return routeUrl(context, url, urlWithoutQuery, args);
         }
     }
 
-    private boolean routeUrl(String url, String processedUrl, Bundle args) {
+    private boolean routeUrl(Context context, String url, String processedUrl, Bundle args) {
         Collections.sort(processors, new Comparator<Pair<String, Processor>>() {
             @Override
             public int compare(Pair<String, Processor> value1, Pair<String, Processor> value2) {
