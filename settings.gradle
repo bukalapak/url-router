@@ -1,0 +1,3 @@
+include ':url-router', ':sample'
+
+rootProject.name = 'url-router-project'
