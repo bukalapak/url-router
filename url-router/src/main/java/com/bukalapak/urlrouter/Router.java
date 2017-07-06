@@ -151,8 +151,8 @@ public class Router {
         String bodyRegex = expression
                 .replaceAll("\\.", "\\\\.")
                 .replaceAll("\\*", ".+")
-                .replaceAll("/<\\w+>/", "/([A-Za-z0-9_-]+)/")
-                .replaceAll("<\\w+>", "([A-Za-z0-9_]+)");
+                .replaceAll("/<\\w+>/", "/([^\\/]+)/")
+                .replaceAll("<\\w+>", "(.\\w)");
 
         if (bodyRegex.endsWith("/")) {
             bodyRegex = bodyRegex.substring(0, bodyRegex.length() - 1);
@@ -172,9 +172,13 @@ public class Router {
             }
             Uri uri = Uri.parse(url);
             if (!nullToEmpty(uri.getQuery()).equals("")) {
-                Set<String> names = uri.getQueryParameterNames();
-                for (String name : names) {
-                    queryMap.put(name, uri.getQueryParameter(name));
+                try {
+                    Set<String> names = uri.getQueryParameterNames(); // It crashes for sms:?body=hehe
+                    for (String name : names) {
+                        queryMap.put(name, uri.getQueryParameter(name));
+                    }
+                } catch (Exception ignored) {
+                    // Exception never been catched, internal bug from android (?)
                 }
             }
             return true;
