@@ -20,13 +20,13 @@ import java.util.regex.Pattern;
 
 public class Router {
 
-    private final static String TAG = "DeeplinkRouter";
+    private final static String TAG = "Router";
 
     private List<Pair<String, Processor>> processors;
     private List<Pair<String, PreProcessor>> preProcessors;
     private Preparation preparation;
 
-    public Router(Context context) {
+    public Router() {
         this.processors = new ArrayList<>();
         this.preProcessors = new ArrayList<>();
     }
@@ -150,7 +150,7 @@ public class Router {
                 .replaceAll("\\.", "\\\\.")
                 .replaceAll("\\*", ".+")
                 .replaceAll("/<\\w+>/", "/([^\\/]+)/")
-                .replaceAll("<\\w+>", "(.\\w)");
+                .replaceAll("<\\w+>", "([A-Za-z0-9-_=]+)");
 
         if (bodyRegex.endsWith("/")) {
             bodyRegex = bodyRegex.substring(0, bodyRegex.length() - 1);
@@ -171,7 +171,7 @@ public class Router {
             Uri uri = Uri.parse(url);
             if (!nullToEmpty(uri.getQuery()).equals("")) {
                 try {
-                    Set<String> names = uri.getQueryParameterNames(); // It crashes for sms:?body=hehe
+                    Set<String> names = uri.getQueryParameterNames(); // It crashes in very long query value
                     for (String name : names) {
                         queryMap.put(name, uri.getQueryParameter(name));
                     }
