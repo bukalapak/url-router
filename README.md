@@ -70,7 +70,7 @@ router.route(context, url, optionalArgs)
 Add this line in your `build.gradle` file:
 
 ```
-compile 'com.mrhabibi:url-router:0.0.2'
+compile 'com.bukalapak:url-router:0.0.2'
 ```
 
 This library is hosted in the [JCenter repository](https://bintray.com/bukalapak/maven), so you have to ensure that the repository is included:
