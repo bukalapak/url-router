@@ -8,60 +8,100 @@ A wrapper for easily routing URL on Android
 ### Initialization
 
 ```
-Router router = new Router();
-
-// Mapping the schema and authority
-router.preMap("*://<subdomain>.mysite.com/*", (ctx, result) -> {
+/* 
+ * Mapping the schema and host
+ */
+ 
+Router.getInstance().preMap("*://<subdomain:[a-z]+>.mysite.com/*", (ctx, result) -> {
     String subdomain = result.variables.get("subdomain");
     if (subdomain.equals("blog")) {
         // Launch intent
+        ...
         return null; // Don't continue to path routing below by returning null
     } else {
         return Uri.parse(result.url).getPath(); // Continue to path routing below
     }
 });
 
-// Mapping the path
+/* 
+ * Mapping the path
+ */
 
-// Simple mapping
-router.map("/about", (ctx, result) -> {
-    // Launch about activity
+/* Simple mapping */
+
+Router.getInstance().map("/about", (ctx, result) -> {
+    ...
 });
 
-// Wildcard at the end for any characters until end of url
-router.map("/promo/*", (ctx, result) -> {
-    // Launch promo activity
+/* Wildcard at the end for any characters until end of url */
+
+Router.getInstance().map("/promo/*", (ctx, result) -> {
+    ...
 });
 
-// Wildcard in segment for any character in specific segment
-router.map("/promo/*/discounted", (ctx, result) -> {
-    // Launch discounted promo activity
+/* Wildcard in segment for any character in specific segment */
+
+Router.getInstance().map("/promo/*/discounted", (ctx, result) -> {
+    ...
 });
 
-// Get value from parsed queries
-router.map("/login", (ctx, result) -> {
+/* Get value from parsed queries */
+
+Router.getInstance().map("/login", (ctx, result) -> {
     String referrer = result.queries.get("referrer")
-    // Launch login activity
+    ...
 });
 
-// Get value from parsed variables in segment of path
-router.map("/transaction/<transaction_id>/view", (ctx, result) -> {
+/* Get value from parsed variables in segment of path */
+
+Router.getInstance().map("/transaction/<transaction_id>/view", (ctx, result) -> {
     String transactionId = result.variables.get("transaction_id")
-    // Launch transaction activity
+    ...
 });
 
-// Get value from parsed variables in subsegment of segment
-router.map("/product/<product_id>-*", (ctx, result) -> {
+/* Get value from parsed variables in subsegment of segment */
+
+Router.getInstance().map("/product/<product_id:[a-z0-9]+>-*", (ctx, result) -> {
     String productId = result.variables.get("product_id")
-    // Launch product activity
+    ...
 });
 ```
 
-### Routing Usage
+### Usage
 
 ```
-router.route(context, url, optionalArgs)
+Router.getInstance().route(context, url, optionalArgs)
 ```
+
+### Multiple Instances
+
+```
+Router loginUserRouter = new Router();
+Router nonloginUserRouter = new Router();
+```
+
+### Language
+
+#### Wildcard : `*`
+- Can be placed anywhere except query
+- Used for replacing any character inside URL
+- Regex: `.+` -> Any character more than 1
+
+#### Variable Name : `<variable_name>`
+- Can be placed anywhere except query
+- Used for getting value inside URL
+- Variable name can only use `A-Z`, `a-z`, `0-9`, and `_`
+- Default regex: `[^/]+` -> Any character more than 1 except `/`
+- Default regex can be changed
+
+#### Variable Name With Specific Pattern : `<variable_name:[a-z0-9]+>`
+- Can be placed anywhere except query
+- Used for getting value inside URL
+- Variable name can only use `A-Z`, `a-z`, `0-9`, and `_`
+- Default regex: `[^/]+` -> Any character more than 1 except `/`
+- Default regex can be changed
+- Variable name and regex separated with `:`
+- Specific regex overrides default regex
 
 ## Installation
 
@@ -70,7 +110,7 @@ router.route(context, url, optionalArgs)
 Add this line in your `build.gradle` file:
 
 ```
-compile 'com.bukalapak:url-router:0.0.2'
+compile 'com.bukalapak:url-router:0.0.3'
 ```
 
 This library is hosted in the [JCenter repository](https://bintray.com/bukalapak/maven), so you have to ensure that the repository is included:
