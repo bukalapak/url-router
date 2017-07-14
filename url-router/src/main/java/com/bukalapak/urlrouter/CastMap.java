@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 /**
  * Created by mrhabibi on 5/26/17.
+ * Extension class of HashMap as container class for parsed variables and queries
  */
 
 public class CastMap extends HashMap<String, String> {
