@@ -47,7 +47,7 @@ Router.getInstance().map("/promo/*/discounted", (ctx, result) -> {
 
 /* Get value from parsed queries */
 
-Router.getInstance().map("/login", (ctx, result) -> {
+Router.getInstance().map("/register", (ctx, result) -> {
     String referrer = result.queries.get("referrer")
     ...
 });
