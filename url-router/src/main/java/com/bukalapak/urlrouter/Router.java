@@ -25,7 +25,7 @@ public class Router {
 
     /**
      * Regex used for variable
-     * Example: <variable_name:[a-z0-9]+>
+     * Example: < variable_name:[a-z0-9]+ >
      */
     private final static String VARIABLE_REGEX = "<(\\w+)(:([^>]+))?>";
 
@@ -64,7 +64,7 @@ public class Router {
 
     /**
      * Setter for default regex used for variable without specific regex
-     * Example: <variable_name>
+     * Example: < variable_name >
      *
      * @param defaultVariableRegex Default regex for variable
      */
