@@ -7,21 +7,21 @@ A wrapper for easily routing URL on Android
 
 ### Initialization
 
-```
+```kotlin
 /* 
  * Mapping the schema and host
  */
  
-Router.getInstance().preMap("*://<subdomain:[a-z]+>.mysite.com/*", (context, result) -> {
-    String subdomain = result.variables.get("subdomain");
-    if (subdomain.equals("blog")) {
+Router.INSTANCE.preMap("*://<subdomain:[a-z]+>.mysite.com/*", {
+    val subdomain = it.variables.getString("subdomain")
+    if (subdomain == "blog") {
         // Launch intent
         ...
-        return null; // Don't continue to path routing below by returning null
+        null // Don't continue to path routing below by returning null
     } else {
-        return Uri.parse(result.url).getPath(); // Continue to path routing below
+        Uri.parse(it.url).path // Continue to path routing below
     }
-});
+})
 
 /* 
  * Mapping the path
@@ -29,55 +29,55 @@ Router.getInstance().preMap("*://<subdomain:[a-z]+>.mysite.com/*", (context, res
 
 /* Simple mapping */
 
-Router.getInstance().map("/about", (context, result) -> {
+Router.INSTANCE.map("/about", {
     ...
-});
+})
 
 /* Wildcard at the end for any characters until end of url */
 
-Router.getInstance().map("/promo/*", (context, result) -> {
+Router.INSTANCE.map("/promo/*", {
     ...
-});
+})
 
 /* Wildcard in segment for any character in specific segment */
 
-Router.getInstance().map("/promo/*/discounted", (context, result) -> {
+Router.INSTANCE.map("/promo/*/discounted", {
     ...
-});
+})
 
 /* Get value from parsed queries */
 
-Router.getInstance().map("/register", (context, result) -> {
-    String referrer = result.queries.get("referrer")
+Router.INSTANCE.map("/register", {
+    val referrer = it.queries.getString("referrer")
     ...
-});
+})
 
 /* Get value from parsed variables in segment of path */
 
-Router.getInstance().map("/transaction/<transaction_id>/view", (context, result) -> {
-    String transactionId = result.variables.get("transaction_id")
+Router.INSTANCE.map("/transaction/<transaction_id>/view", {
+    val transactionId = it.variables.getLong("transaction_id")
     ...
-});
+})
 
 /* Get value from parsed variables in subsegment of segment */
 
-Router.getInstance().map("/product/<product_id:[a-z0-9]+>-*", (context, result) -> {
-    String productId = result.variables.get("product_id")
+Router.INSTANCE.map("/product/<product_id:[a-z0-9]+>-*", {
+    val productId = it.variables.getString("product_id")
     ...
-});
+})
 ```
 
 ### Usage
 
-```
-Router.getInstance().route(context, url, optionalArgs)
+```kotlin
+Router.INSTANCE.route(context, url, optionalArgs)
 ```
 
 ### Multiple Instances
 
-```
-Router loginUserRouter = new Router();
-Router nonloginUserRouter = new Router();
+```kotlin
+val loginUserRouter = Router()
+val nonloginUserRouter = Router()
 ```
 
 ### Language

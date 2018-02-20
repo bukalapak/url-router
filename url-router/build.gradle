@@ -15,7 +15,7 @@ ext {
     siteUrl = 'https://github.com/bukalapak/url-router'
     gitUrl = 'https://github.com/bukalapak/url-router.git'
 
-    libraryVersion = '1.0.2'
+    libraryVersion = '1.0.3'
 
     developerId = 'mrhabibi'
     developerName = 'Muhammad Rizky Habibi'
@@ -55,7 +55,7 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 100002
+        versionCode 100003
         versionName "$libraryVersion"
 
     }

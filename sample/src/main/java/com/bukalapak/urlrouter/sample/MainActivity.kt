@@ -10,9 +10,9 @@ import com.bukalapak.urlrouter.Router
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var editTextUrl: EditText
-    lateinit var buttonRoute: Button
-    lateinit var textViewResult: TextView
+    private lateinit var editTextUrl: EditText
+    private lateinit var buttonRoute: Button
+    private lateinit var textViewResult: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,21 +22,21 @@ class MainActivity : AppCompatActivity() {
         buttonRoute = findViewById(R.id.button_route) as Button
         textViewResult = findViewById(R.id.textview_result) as TextView
 
-        buttonRoute.setOnClickListener { view -> Router.instance.route(this, editTextUrl.text.toString(), null) }
+        buttonRoute.setOnClickListener { _ -> Router.INSTANCE.route(this, editTextUrl.text.toString(), null) }
 
         setMapping()
     }
 
     private fun setMapping() {
-        val router = Router.instance
+        val router = Router.INSTANCE
 
         router.preMap("*://<subdomain:[a-z]+>.mysite.com/*", {
-            val subdomain = it.variables.get("subdomain")
+            val subdomain = it.variables.getString("subdomain")
             if (subdomain == "blog") {
                 displayResult("Launch intent: " + it.url)
                 null // Don't continue routing
             } else {
-                Uri.parse(it.url).getPath() // Continue routing
+                Uri.parse(it.url).path // Continue routing
             }
         })
 
@@ -51,19 +51,19 @@ class MainActivity : AppCompatActivity() {
 
         // https://www.mysite.com/register?referrer=anonymous
         router.map("/register", {
-            val referrer = it.queries.get("referrer")
+            val referrer = it.queries.getString("referrer")
             displayResult("Open registration page with referrer " + referrer)
         })
 
         // https://www.mysite.com/register?referrer=anonymous
         router.map("/transaction/<transaction_id>/view", {
-            val transactionId = it.variables.get("transaction_id")
+            val transactionId = it.variables.getLong("transaction_id")
             displayResult("Open transaction detail page " + transactionId)
         })
 
         // https://www.mysite.com/product/kj9fd8-tas-paling-keren-masa-kini
         router.map("/product/<product_id:[a-z0-9]+>-*", {
-            val productId = it.variables.get("product_id")
+            val productId = it.variables.getString("product_id")
             displayResult("Open product detail page " + productId)
         })
     }

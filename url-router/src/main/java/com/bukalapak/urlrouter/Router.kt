@@ -4,8 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.util.Pair
-import java.util.*
 import java.util.regex.Pattern
 
 typealias PreProcessor = (Result) -> String?
@@ -22,12 +20,12 @@ class Router {
     /**
      * Store expressions of map()
      */
-    private val processors = mutableListOf<Pair<String, Processor>>()
+    private val processors = mutableListOf<Expression<Processor>>()
 
     /**
      * Store expressions of preMap()
      */
-    private val preProcessors = mutableListOf<Pair<String, PreProcessor>>()
+    private val preProcessors = mutableListOf<Expression<PreProcessor>>()
 
     /**
      * Setter for invocation after launching preMap() and before map()
@@ -42,7 +40,7 @@ class Router {
      *
      * @param defaultVariableRegex Default regex for variable
      */
-    var defaultVariableRegex = "[^\\/]+"
+    var defaultVariableRegex = DEFAULT_VARIABLE_REGEX
 
     /**
      * Path and query processor for single expression in  single processor
@@ -51,7 +49,7 @@ class Router {
      * @param processor  Invocation
      */
     fun map(expression: String, processor: Processor) {
-        processors.add(Pair(expression, processor))
+        processors.add(Expression(expression, processor))
     }
 
     /**
@@ -61,7 +59,7 @@ class Router {
      * @param processor   Invocation
      */
     fun map(expressions: List<String>, processor: Processor) {
-        processors.addAll(expressions.map { Pair(it, processor) })
+        processors.addAll(expressions.map { Expression(it, processor) })
     }
 
     /**
@@ -71,7 +69,7 @@ class Router {
      * @param preProcessor  Invocation
      */
     fun preMap(expression: String, preProcessor: PreProcessor) {
-        preProcessors.add(Pair(expression, preProcessor))
+        preProcessors.add(Expression(expression, preProcessor))
     }
 
     /**
@@ -82,11 +80,15 @@ class Router {
      * @param postfixes   Postfixes
      * @param processor   Processor
      */
-    fun preMap(prefixes: List<String>, expressions: List<String>, postfixes: List<String>, processor: PreProcessor) {
+    fun preMap(prefixes: List<String> = emptyList(),
+               expressions: List<String>,
+               postfixes: List<String> = emptyList(),
+               processor: PreProcessor) {
+
         prefixes.forEach { prefix ->
             expressions.forEach { expression ->
                 postfixes.forEach { postfix ->
-                    preProcessors.add(Pair(nullToEmpty(prefix) + expression + nullToEmpty(postfix), processor))
+                    preProcessors.add(Expression(prefix.nullToEmpty() + expression + postfix.nullToEmpty(), processor))
                 }
             }
         }
@@ -101,36 +103,32 @@ class Router {
      * @return Has routing path
      */
     fun route(context: Context, url: String, args: Bundle?): Boolean {
-        var urlWithoutQuery = url
 
         // remove the query
-        if (urlWithoutQuery.contains("?")) {
-            urlWithoutQuery = urlWithoutQuery.split("\\?".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-        }
+        val urlWithoutQuery = url.split('?')[0]
 
         // preMap is optional, if there is no preMap, it will directly go to map expressions
-        if (preProcessors.size > 0) {
+        if (preProcessors.isNotEmpty()) {
 
             // Do sorting first
-            Collections.sort<Pair<String, PreProcessor>>(preProcessors) { value1, value2 -> sort(value1.first, value2.first) }
+            preProcessors.sortedWith(generateComparator())
 
-            for (preProcessorPair in preProcessors) {
-                val variableMap = CastMap()
-                val queryMap = CastMap()
+            preProcessors.forEach {
+                val variables = CastMap()
+                val queries = CastMap()
 
                 // Check the preMap matching
-                val match = parse(url, urlWithoutQuery, preProcessorPair.first, variableMap, queryMap)
+                val match = parse(url, urlWithoutQuery, it.pattern, variables, queries)
 
                 if (match) {
-                    val result = Result(context, url, variableMap, queryMap, args)
-                    val processedUrl = preProcessorPair.second.invoke(result)
+                    val result = Result(context, url, variables, queries, args)
+                    val processedUrl = it.processor.invoke(result)
 
                     // processedUrl == null means that the preMap won't be continued to map
-                    if (processedUrl != null) {
-                        return routeUrl(context, url, processedUrl, args)
-                    } else {
-                        Log.i(TAG, "Routing url " + url + " using " + preProcessorPair.first)
-                        return true
+                    return if (processedUrl != null) routeUrl(context, url, processedUrl, args)
+                    else {
+                        Log.i(TAG, "Routing url " + url + " using " + it.pattern)
+                        true
                     }
                 }
             }
@@ -153,25 +151,22 @@ class Router {
     private fun routeUrl(context: Context, url: String, processedUrl: String, args: Bundle?): Boolean {
 
         // Do sorting first
-        Collections.sort<Pair<String, Processor>>(processors) { value1, value2 -> sort(value1.first, value2.first) }
+        processors.sortWith(generateComparator())
 
-        for (processorPair in processors) {
-            val variableMap = CastMap()
-            val queryMap = CastMap()
+        processors.forEach {
+            val variables = CastMap()
+            val queries = CastMap()
 
             // Check the map matching
-            val match = parse(url, processedUrl, processorPair.first, variableMap, queryMap)
+            val match = parse(url, processedUrl, it.pattern, variables, queries)
 
             if (match) {
-                val result = Result(context, url, variableMap, queryMap, args)
+                val result = Result(context, url, variables, queries, args)
 
                 // Do preparation if it's set
-                if (preparation != null) {
-                    preparation!!.invoke(processorPair.second, result)
-                } else {
-                    processorPair.second.invoke(result)
-                }
-                Log.i(TAG, "Routing url " + url + " using " + processorPair.first)
+                preparation?.invoke(it.processor, result) ?: it.processor.invoke(result)
+
+                Log.i(TAG, "Routing url " + url + " using " + it.pattern)
                 return true
             }
         }
@@ -186,15 +181,15 @@ class Router {
      * @param expression2 url 2
      * @return Comparation
      */
-    private fun sort(expression1: String, expression2: String): Int {
+    private fun <P> generateComparator(): Comparator<Expression<P>> = Comparator({ expression1, expression2 ->
 
         // Replace all variable into * first
-        val expr1 = expression1.replace(VARIABLE_REGEX.toRegex(), "*")
-        val expr2 = expression2.replace(VARIABLE_REGEX.toRegex(), "*")
+        val expr1 = expression1.pattern.replace(VARIABLE_REGEX.toRegex(), "*")
+        val expr2 = expression2.pattern.replace(VARIABLE_REGEX.toRegex(), "*")
 
         // Return which is the longest expression
-        return expr2.length - expr1.length
-    }
+        expr2.length - expr1.length
+    })
 
     /**
      * Parsing the expression
@@ -202,19 +197,22 @@ class Router {
      * @param url          Full URL
      * @param processedUrl Processed sub URL
      * @param expression   Expression
-     * @param variableMap  Parsed variables
-     * @param queryMap     Parsed queries
+     * @param variables  Parsed variables
+     * @param queries     Parsed queries
      * @return Is matched
      */
-    private fun parse(url: String, processedUrl: String, expression: String, variableMap: CastMap, queryMap: CastMap): Boolean {
-        var processedUrl = processedUrl
-        val variableNames = ArrayList<String>()
+    private fun parse(url: String,
+                      processedUrl: String,
+                      expression: String,
+                      variables: CastMap,
+                      queries: CastMap): Boolean {
 
-        val variableMatcher = Pattern.compile(VARIABLE_REGEX).matcher(expression)
+        val varNames = mutableListOf<String>()
+        val varMatcher = Pattern.compile(VARIABLE_REGEX).matcher(expression)
 
         // Collect variable names from expression
-        while (variableMatcher.find()) {
-            variableNames.add(variableMatcher.group(1))
+        while (varMatcher.find()) {
+            varNames.add(varMatcher.group(1))
         }
 
         // Sanitize expression into pure regex form
@@ -223,51 +221,45 @@ class Router {
                 .replace("\\*".toRegex(), ".+") // wildcard
                 .replace("<\\w+>".toRegex(), "($defaultVariableRegex)") // variable with no specific regex
 
-        val variableRegexMatcher = Pattern.compile(VARIABLE_REGEX).matcher(bodyRegex)
+        val varRegexMatcher = Pattern.compile(VARIABLE_REGEX).matcher(bodyRegex)
 
         // Sanitize variable in expression with specific regex
-        while (variableRegexMatcher.find()) {
-            bodyRegex = bodyRegex.replaceFirst(VARIABLE_REGEX.toRegex(), "(" + variableRegexMatcher.group(3) + ")")
+        while (varRegexMatcher.find()) {
+            bodyRegex = bodyRegex.replaceFirst(VARIABLE_REGEX.toRegex(), "(${varRegexMatcher.group(3)})")
         }
 
         // Remove last slash in expression and URL
-        if (bodyRegex.endsWith("/")) {
-            bodyRegex = bodyRegex.substring(0, bodyRegex.length - 1)
-        }
-        if (processedUrl.endsWith("/")) {
-            processedUrl = processedUrl.substring(0, processedUrl.length - 1)
-        }
+        bodyRegex = bodyRegex.removeSuffix("/")
+        val cleanUrl = processedUrl.removeSuffix("/")
 
-        val bodyMatcher = Pattern.compile(bodyRegex).matcher(processedUrl)
+        val bodyMatcher = Pattern.compile(bodyRegex).matcher(cleanUrl)
 
         // If URL matches expression
-        if (bodyMatcher.matches()) {
+        return if (bodyMatcher.matches()) {
 
             // Put parsed variable value into the container
-            for (i in variableNames.indices) {
-                val value = bodyMatcher.group(i + 1)
-                variableMap[variableNames[i]] = value
+            varNames.forEachIndexed { index, name ->
+                variables[name] = bodyMatcher.group(index + 1)
             }
 
             val uri = Uri.parse(url)
 
             // Parse the queries
-            if (nullToEmpty(uri.query) != "") {
+            if (!uri.query.isNullOrEmpty()) {
                 try {
                     val names = uri.queryParameterNames // It crashes in very long query value
 
                     // Put into the container
-                    for (name in names) {
-                        queryMap[name] = uri.getQueryParameter(name)
+                    names.forEach {
+                        queries[it] = uri.getQueryParameter(it)
                     }
                 } catch (ignored: Exception) {
                     // Exception never been catched, internal bug from android (?)
                 }
 
             }
-            return true
-        }
-        return false
+            true
+        } else false
     }
 
     /**
@@ -276,7 +268,17 @@ class Router {
      * @param str String
      * @return Converted String
      */
-    private fun nullToEmpty(str: String?): String = str ?: ""
+    private fun String.nullToEmpty(): String = this ?: ""
+
+    fun reset(onlyRoutes: Boolean = false) {
+        preProcessors.clear()
+        processors.clear()
+        if (!onlyRoutes) {
+            preparation = null
+            defaultVariableRegex = DEFAULT_VARIABLE_REGEX
+        }
+
+    }
 
     companion object {
 
@@ -287,6 +289,7 @@ class Router {
          * Example: ❮variable_name:[a-z0-9]+❯
          */
         private const val VARIABLE_REGEX = "<(\\w+)(:([^>]+))?>"
+        private const val DEFAULT_VARIABLE_REGEX = "[^\\/]+"
 
         private var router: Router? = null
 
@@ -295,7 +298,7 @@ class Router {
          *
          * @return Router instance
          */
-        val instance: Router
+        val INSTANCE: Router
             get() {
                 val r = router ?: Router()
                 router = r

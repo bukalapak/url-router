@@ -9,9 +9,18 @@ import java.util.*
 
 class CastMap : HashMap<String, String>() {
 
+    @Deprecated("Don't use default's for preventing null value")
+    override fun get(key: String): String? {
+        throw IllegalStateException("I've told you to not use default's")
+    }
+
+    fun getString(key: String): String = if (containsKey(key)) {
+        super.get(key) ?: ""
+    } else ""
+
     fun getLong(key: String): Long = if (containsKey(key)) {
         try {
-            get(key)?.toLong() ?: 0L
+            super.get(key)?.toLong() ?: 0L
         } catch (ex: Exception) {
             0L
         }
@@ -19,14 +28,30 @@ class CastMap : HashMap<String, String>() {
 
     fun getInt(key: String): Int = if (containsKey(key)) {
         try {
-            get(key)?.toInt() ?: 0
+            super.get(key)?.toInt() ?: 0
         } catch (ex: Exception) {
             0
         }
     } else 0
 
-    fun getBool(key: String): Boolean = if (containsKey(key)) {
-        get(key).equals("true", ignoreCase = true) || get(key).equals("1", ignoreCase = true)
+    fun getFloat(key: String): Float = if (containsKey(key)) {
+        try {
+            super.get(key)?.toFloat() ?: 0.0F
+        } catch (ex: Exception) {
+            0.0F
+        }
+    } else 0.0F
+
+    fun getDouble(key: String): Double = if (containsKey(key)) {
+        try {
+            super.get(key)?.toDouble() ?: 0.0
+        } catch (ex: Exception) {
+            0.0
+        }
+    } else 0.0
+
+    fun getBoolean(key: String): Boolean = if (containsKey(key)) {
+        super.get(key).equals("true", ignoreCase = true) || super.get(key).equals("1", ignoreCase = true)
     } else false
 
 }
