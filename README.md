@@ -12,7 +12,7 @@ A wrapper for easily routing URL on Android
  * Mapping the schema and host
  */
  
-Router.getInstance().preMap("*://<subdomain:[a-z]+>.mysite.com/*", (ctx, result) -> {
+Router.getInstance().preMap("*://<subdomain:[a-z]+>.mysite.com/*", (context, result) -> {
     String subdomain = result.variables.get("subdomain");
     if (subdomain.equals("blog")) {
         // Launch intent
@@ -29,39 +29,39 @@ Router.getInstance().preMap("*://<subdomain:[a-z]+>.mysite.com/*", (ctx, result)
 
 /* Simple mapping */
 
-Router.getInstance().map("/about", (ctx, result) -> {
+Router.getInstance().map("/about", (context, result) -> {
     ...
 });
 
 /* Wildcard at the end for any characters until end of url */
 
-Router.getInstance().map("/promo/*", (ctx, result) -> {
+Router.getInstance().map("/promo/*", (context, result) -> {
     ...
 });
 
 /* Wildcard in segment for any character in specific segment */
 
-Router.getInstance().map("/promo/*/discounted", (ctx, result) -> {
+Router.getInstance().map("/promo/*/discounted", (context, result) -> {
     ...
 });
 
 /* Get value from parsed queries */
 
-Router.getInstance().map("/register", (ctx, result) -> {
+Router.getInstance().map("/register", (context, result) -> {
     String referrer = result.queries.get("referrer")
     ...
 });
 
 /* Get value from parsed variables in segment of path */
 
-Router.getInstance().map("/transaction/<transaction_id>/view", (ctx, result) -> {
+Router.getInstance().map("/transaction/<transaction_id>/view", (context, result) -> {
     String transactionId = result.variables.get("transaction_id")
     ...
 });
 
 /* Get value from parsed variables in subsegment of segment */
 
-Router.getInstance().map("/product/<product_id:[a-z0-9]+>-*", (ctx, result) -> {
+Router.getInstance().map("/product/<product_id:[a-z0-9]+>-*", (context, result) -> {
     String productId = result.variables.get("product_id")
     ...
 });
@@ -110,7 +110,7 @@ Router nonloginUserRouter = new Router();
 Add this line in your `build.gradle` file:
 
 ```
-compile 'com.bukalapak:url-router:0.1.0'
+compile 'com.bukalapak:url-router:1.0.0'
 ```
 
 This library is hosted in the [JCenter repository](https://bintray.com/bukalapak/maven), so you have to ensure that the repository is included:
