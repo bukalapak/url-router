@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         val router = Router.instance
 
         router.preMap("*://<subdomain:[a-z]+>.mysite.com/*", {
-            val subdomain = it.variables?.get("subdomain")
+            val subdomain = it.variables.get("subdomain")
             if (subdomain == "blog") {
                 displayResult("Launch intent: " + it.url)
                 null // Don't continue routing
@@ -51,19 +51,19 @@ class MainActivity : AppCompatActivity() {
 
         // https://www.mysite.com/register?referrer=anonymous
         router.map("/register", {
-            val referrer = it.queries?.get("referrer")
+            val referrer = it.queries.get("referrer")
             displayResult("Open registration page with referrer " + referrer)
         })
 
         // https://www.mysite.com/register?referrer=anonymous
         router.map("/transaction/<transaction_id>/view", {
-            val transactionId = it.variables?.get("transaction_id")
+            val transactionId = it.variables.get("transaction_id")
             displayResult("Open transaction detail page " + transactionId)
         })
 
         // https://www.mysite.com/product/kj9fd8-tas-paling-keren-masa-kini
         router.map("/product/<product_id:[a-z0-9]+>-*", {
-            val productId = it.variables?.get("product_id")
+            val productId = it.variables.get("product_id")
             displayResult("Open product detail page " + productId)
         })
     }

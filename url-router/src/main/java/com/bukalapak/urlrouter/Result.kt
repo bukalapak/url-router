@@ -9,6 +9,6 @@ import android.os.Bundle
 
 class Result(val context: Context,
              val url: String,
-             val variables: CastMap?,
-             val queries: CastMap?,
+             val variables: CastMap,
+             val queries: CastMap,
              val args: Bundle?)
