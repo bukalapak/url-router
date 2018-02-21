@@ -125,8 +125,9 @@ class Router {
                     val processedUrl = it.processor.invoke(result)
 
                     // processedUrl == null means that the preMap won't be continued to map
-                    return if (processedUrl != null) routeUrl(context, url, processedUrl, args)
-                    else {
+                    return if (processedUrl != null) {
+                        routeUrl(context, url, processedUrl, args)
+                    } else {
                         Log.i(TAG, "Routing url " + url + " using " + it.pattern)
                         true
                     }
@@ -163,8 +164,14 @@ class Router {
             if (match) {
                 val result = Result(context, url, variables, queries, args)
 
-                // Do preparation if it's set
-                preparation?.invoke(it.processor, result) ?: it.processor.invoke(result)
+                // Router won't execute routing if it's true
+                val checkOnly = args?.getBoolean(ARG_CHECK_ONLY) == true
+
+                if (!checkOnly) {
+
+                    // Do preparation if it's set
+                    preparation?.invoke(it.processor, result) ?: it.processor.invoke(result)
+                }
 
                 Log.i(TAG, "Routing url " + url + " using " + it.pattern)
                 return true
@@ -175,11 +182,7 @@ class Router {
     }
 
     /**
-     * URL priority sorting
-     *
-     * @param expression1 url 1
-     * @param expression2 url 2
-     * @return Comparation
+     * generate URL priority comparator
      */
     private fun <P> generateComparator(): Comparator<Expression<P>> = Comparator({ expression1, expression2 ->
 
@@ -264,12 +267,14 @@ class Router {
 
     /**
      * Null to empty string converter
-     *
-     * @param str String
-     * @return Converted String
      */
     private fun String.nullToEmpty(): String = this ?: ""
 
+    /**
+     * Router resetter
+     *
+     * @param onlyRoutes Clear only map and premap if true, otherwise reset everything
+     */
     fun reset(onlyRoutes: Boolean = false) {
         preProcessors.clear()
         processors.clear()
@@ -290,6 +295,8 @@ class Router {
          */
         private const val VARIABLE_REGEX = "<(\\w+)(:([^>]+))?>"
         private const val DEFAULT_VARIABLE_REGEX = "[^\\/]+"
+
+        const val ARG_CHECK_ONLY = "arg_check_only"
 
         private var router: Router? = null
 

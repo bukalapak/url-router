@@ -10,9 +10,7 @@ import java.util.*
 class CastMap : HashMap<String, String>() {
 
     @Deprecated("Don't use default's for preventing null value")
-    override fun get(key: String): String? {
-        throw IllegalStateException("I've told you to not use default's")
-    }
+    override fun get(key: String): String? = super.get(key)
 
     fun getString(key: String): String = if (containsKey(key)) {
         super.get(key) ?: ""
