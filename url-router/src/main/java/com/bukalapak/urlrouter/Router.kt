@@ -8,7 +8,8 @@ import java.util.regex.Pattern
 
 typealias PreProcessor = (Result) -> String?
 typealias Processor = (Result) -> Unit
-typealias Preparation = (Processor, Result) -> Unit
+typealias GlobalInterceptor = (Interceptor, Processor, Result) -> Unit
+typealias Interceptor = (Processor, Result) -> Unit
 
 /**
  * Created by mrhabibi on 5/8/17.
@@ -32,7 +33,7 @@ class Router {
      *
      * @param preparation Invocation
      */
-    var preparation: Preparation? = null
+    var globalInterceptor: GlobalInterceptor = DEFAULT_GLOBAL_INTERCEPTOR
 
     /**
      * Setter for default regex used for variable without specific regex
@@ -88,7 +89,11 @@ class Router {
         prefixes.forEach { prefix ->
             expressions.forEach { expression ->
                 postfixes.forEach { postfix ->
-                    preProcessors.add(Expression(prefix.nullToEmpty() + expression + postfix.nullToEmpty(), processor))
+                    preProcessors.add(Expression(
+                            prefix.nullToEmpty() +
+                                    expression +
+                                    postfix.nullToEmpty(),
+                            processor))
                 }
             }
         }
@@ -102,7 +107,10 @@ class Router {
      * @param args    Optional arguments
      * @return Has routing path
      */
-    fun route(context: Context, url: String, args: Bundle?): Boolean {
+    fun route(context: Context,
+              url: String,
+              interceptor: Interceptor = { processor, result -> processor.invoke(result) },
+              args: Bundle? = null): Boolean {
 
         // remove the query
         val urlWithoutQuery = url.split('?')[0]
@@ -126,7 +134,7 @@ class Router {
 
                     // processedUrl == null means that the preMap won't be continued to map
                     return if (processedUrl != null) {
-                        routeUrl(context, url, processedUrl, args)
+                        routeUrl(context, url, processedUrl, interceptor, args)
                     } else {
                         Log.i(TAG, "Routing url " + url + " using " + it.pattern)
                         true
@@ -136,7 +144,7 @@ class Router {
             Log.e(TAG, "No route for url " + url)
             return false
         } else {
-            return routeUrl(context, url, urlWithoutQuery, args)
+            return routeUrl(context, url, urlWithoutQuery, interceptor, args)
         }
     }
 
@@ -149,7 +157,10 @@ class Router {
      * @param args         Optional arguments
      * @return Has routing path
      */
-    private fun routeUrl(context: Context, url: String, processedUrl: String, args: Bundle?): Boolean {
+    private fun routeUrl(context: Context,
+                         url: String, processedUrl: String,
+                         interceptor: Interceptor,
+                         args: Bundle?): Boolean {
 
         // Do sorting first
         processors.sortWith(generateComparator())
@@ -169,8 +180,8 @@ class Router {
 
                 if (!checkOnly) {
 
-                    // Do preparation if it's set
-                    preparation?.invoke(it.processor, result) ?: it.processor.invoke(result)
+                    // Do global interception if it's set
+                    globalInterceptor.invoke(interceptor, it.processor, result)
                 }
 
                 Log.i(TAG, "Routing url " + url + " using " + it.pattern)
@@ -279,7 +290,7 @@ class Router {
         preProcessors.clear()
         processors.clear()
         if (!onlyRoutes) {
-            preparation = null
+            globalInterceptor = DEFAULT_GLOBAL_INTERCEPTOR
             defaultVariableRegex = DEFAULT_VARIABLE_REGEX
         }
 
@@ -295,6 +306,9 @@ class Router {
          */
         private const val VARIABLE_REGEX = "<(\\w+)(:([^>]+))?>"
         private const val DEFAULT_VARIABLE_REGEX = "[^\\/]+"
+        private val DEFAULT_GLOBAL_INTERCEPTOR: GlobalInterceptor = { interceptor, processor, result ->
+            interceptor.invoke(processor, result)
+        }
 
         const val ARG_CHECK_ONLY = "arg_check_only"
 

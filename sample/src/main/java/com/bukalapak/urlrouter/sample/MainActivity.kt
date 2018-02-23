@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         buttonRoute = findViewById(R.id.button_route) as Button
         textViewResult = findViewById(R.id.textview_result) as TextView
 
-        buttonRoute.setOnClickListener { _ -> Router.INSTANCE.route(this, editTextUrl.text.toString(), null) }
+        buttonRoute.setOnClickListener { _ -> Router.INSTANCE.route(this, editTextUrl.text.toString()) }
 
         setMapping()
     }
