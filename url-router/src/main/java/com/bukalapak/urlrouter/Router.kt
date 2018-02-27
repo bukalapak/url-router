@@ -109,7 +109,7 @@ class Router {
      */
     fun route(context: Context,
               url: String,
-              interceptor: Interceptor = { processor, result -> processor.invoke(result) },
+              interceptor: Interceptor? = null,
               args: Bundle? = null): Boolean {
 
         // remove the query
@@ -159,11 +159,11 @@ class Router {
      */
     private fun routeUrl(context: Context,
                          url: String, processedUrl: String,
-                         interceptor: Interceptor,
+                         interceptor: Interceptor?,
                          args: Bundle?): Boolean {
 
         // Do sorting first
-        processors.sortWith(generateComparator())
+        processors.sortedWith(generateComparator())
 
         processors.forEach {
             val variables = CastMap()
@@ -181,7 +181,7 @@ class Router {
                 if (!checkOnly) {
 
                     // Do global interception if it's set
-                    globalInterceptor.invoke(interceptor, it.processor, result)
+                    globalInterceptor.invoke(interceptor ?: DEFAULT_INTERCEPTOR, it.processor, result)
                 }
 
                 Log.i(TAG, "Routing url " + url + " using " + it.pattern)
@@ -309,6 +309,7 @@ class Router {
         private val DEFAULT_GLOBAL_INTERCEPTOR: GlobalInterceptor = { interceptor, processor, result ->
             interceptor.invoke(processor, result)
         }
+        private val DEFAULT_INTERCEPTOR: Interceptor = { processor, result -> processor.invoke(result) }
 
         const val ARG_CHECK_ONLY = "arg_check_only"
 
