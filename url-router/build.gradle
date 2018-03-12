@@ -15,7 +15,7 @@ ext {
     siteUrl = 'https://github.com/bukalapak/url-router'
     gitUrl = 'https://github.com/bukalapak/url-router.git'
 
-    libraryVersion = '1.0.7'
+    libraryVersion = '1.0.8'
 
     developerId = 'mrhabibi'
     developerName = 'Muhammad Rizky Habibi'
@@ -55,7 +55,7 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 100007
+        versionCode 100008
         versionName "$libraryVersion"
 
     }
@@ -73,7 +73,7 @@ dokka {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 

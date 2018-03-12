@@ -21,12 +21,12 @@ class Router {
     /**
      * Store expressions of map()
      */
-    private val processors = mutableListOf<Expression<Processor>>()
+    private var processors = listOf<Expression<Processor>>()
 
     /**
      * Store expressions of preMap()
      */
-    private val preProcessors = mutableListOf<Expression<PreProcessor>>()
+    private var preProcessors = listOf<Expression<PreProcessor>>()
 
     /**
      * Setter for invocation after launching preMap() and before map()
@@ -50,7 +50,7 @@ class Router {
      * @param processor  Invocation
      */
     fun map(expression: String, processor: Processor) {
-        processors.add(Expression(expression, processor))
+        processors = processors.plus(Expression(expression, processor))
     }
 
     /**
@@ -60,7 +60,7 @@ class Router {
      * @param processor   Invocation
      */
     fun map(expressions: List<String>, processor: Processor) {
-        processors.addAll(expressions.map { Expression(it, processor) })
+        processors = processors.plus(expressions.map { Expression(it, processor) })
     }
 
     /**
@@ -70,7 +70,7 @@ class Router {
      * @param preProcessor  Invocation
      */
     fun preMap(expression: String, preProcessor: PreProcessor) {
-        preProcessors.add(Expression(expression, preProcessor))
+        preProcessors = preProcessors.plus(Expression(expression, preProcessor))
     }
 
     /**
@@ -89,7 +89,7 @@ class Router {
         prefixes.forEach { prefix ->
             expressions.forEach { expression ->
                 postfixes.forEach { postfix ->
-                    preProcessors.add(Expression(
+                    preProcessors = preProcessors.plus(Expression(
                             prefix.nullToEmpty() +
                                     expression +
                                     postfix.nullToEmpty(),
@@ -119,7 +119,7 @@ class Router {
         if (preProcessors.isNotEmpty()) {
 
             // Do sorting first
-            preProcessors.sortedWith(generateComparator())
+            preProcessors = preProcessors.sortedWith(generateComparator())
 
             preProcessors.forEach {
                 val variables = CastMap()
@@ -163,7 +163,7 @@ class Router {
                          args: Bundle?): Boolean {
 
         // Do sorting first
-        processors.sortedWith(generateComparator())
+        processors = processors.sortedWith(generateComparator())
 
         processors.forEach {
             val variables = CastMap()
@@ -279,7 +279,7 @@ class Router {
     /**
      * Null to empty string converter
      */
-    private fun String.nullToEmpty(): String = this ?: ""
+    private fun String?.nullToEmpty(): String = this ?: ""
 
     /**
      * Router resetter
@@ -287,8 +287,8 @@ class Router {
      * @param onlyRoutes Clear only map and premap if true, otherwise reset everything
      */
     fun reset(onlyRoutes: Boolean = false) {
-        preProcessors.clear()
-        processors.clear()
+        preProcessors = listOf()
+        processors = listOf()
         if (!onlyRoutes) {
             globalInterceptor = DEFAULT_GLOBAL_INTERCEPTOR
             defaultVariableRegex = DEFAULT_VARIABLE_REGEX
