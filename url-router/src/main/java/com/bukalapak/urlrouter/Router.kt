@@ -113,7 +113,7 @@ class Router {
               args: Bundle? = null): Boolean {
 
         // remove the query
-        val urlWithoutQuery = url.split('?')[0]
+        val urlPathOnly = url.split('#').first().split('?').first()
 
         // preMap is optional, if there is no preMap, it will directly go to map expressions
         if (preProcessors.isNotEmpty()) {
@@ -122,14 +122,13 @@ class Router {
             preProcessors = preProcessors.sortedWith(generateComparator())
 
             preProcessors.forEach {
-                val variables = CastMap()
-                val queries = CastMap()
+                val rawResult = RawResult()
 
                 // Check the preMap matching
-                val match = parse(url, urlWithoutQuery, it.pattern, variables, queries)
+                val match = parse(url, urlPathOnly, it.pattern, rawResult)
 
                 if (match) {
-                    val result = Result(context, url, variables, queries, args)
+                    val result = rawResult.cook(context, url, args)
                     val processedUrl = it.processor.invoke(result)
 
                     // processedUrl == null means that the preMap won't be continued to map
@@ -144,7 +143,7 @@ class Router {
             Log.e(TAG, "No route for url " + url)
             return false
         } else {
-            return routeUrl(context, url, urlWithoutQuery, interceptor, args)
+            return routeUrl(context, url, urlPathOnly, interceptor, args)
         }
     }
 
@@ -158,7 +157,8 @@ class Router {
      * @return Has routing path
      */
     private fun routeUrl(context: Context,
-                         url: String, processedUrl: String,
+                         url: String,
+                         processedUrl: String,
                          interceptor: Interceptor?,
                          args: Bundle?): Boolean {
 
@@ -166,14 +166,13 @@ class Router {
         processors = processors.sortedWith(generateComparator())
 
         processors.forEach {
-            val variables = CastMap()
-            val queries = CastMap()
+            val rawResult = RawResult()
 
             // Check the map matching
-            val match = parse(url, processedUrl, it.pattern, variables, queries)
+            val match = parse(url, processedUrl, it.pattern, rawResult)
 
             if (match) {
-                val result = Result(context, url, variables, queries, args)
+                val result = rawResult.cook(context, url, args)
 
                 // Router won't execute routing if it's true
                 val checkOnly = args?.getBoolean(ARG_CHECK_ONLY) == true
@@ -218,8 +217,7 @@ class Router {
     private fun parse(url: String,
                       processedUrl: String,
                       expression: String,
-                      variables: CastMap,
-                      queries: CastMap): Boolean {
+                      rawResult: RawResult): Boolean {
 
         val varNames = mutableListOf<String>()
         val varMatcher = Pattern.compile(VARIABLE_REGEX).matcher(expression)
@@ -253,10 +251,13 @@ class Router {
 
             // Put parsed variable value into the container
             varNames.forEachIndexed { index, name ->
-                variables[name] = bodyMatcher.group(index + 1)
+                rawResult.variables[name] = bodyMatcher.group(index + 1)
             }
 
             val uri = Uri.parse(url)
+
+            // Parse the fragment
+            rawResult.fragment = uri.fragment
 
             // Parse the queries
             if (!uri.query.isNullOrEmpty()) {
@@ -265,7 +266,7 @@ class Router {
 
                     // Put into the container
                     names.forEach {
-                        queries[it] = uri.getQueryParameter(it)
+                        rawResult.queries[it] = uri.getQueryParameter(it)
                     }
                 } catch (ignored: Exception) {
                     // Exception never been catched, internal bug from android (?)

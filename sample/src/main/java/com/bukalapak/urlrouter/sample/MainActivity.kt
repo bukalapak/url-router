@@ -2,7 +2,6 @@ package com.bukalapak.urlrouter.sample
 
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.EditText
@@ -24,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         textViewResult = findViewById(R.id.textview_result) as TextView
 
         buttonRoute.setOnClickListener { view ->
-                Router.INSTANCE.route(this, editTextUrl.text.toString())
+            Router.INSTANCE.route(this, editTextUrl.text.toString())
         }
 
         setMapping()

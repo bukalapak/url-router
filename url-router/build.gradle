@@ -15,7 +15,7 @@ ext {
     siteUrl = 'https://github.com/bukalapak/url-router'
     gitUrl = 'https://github.com/bukalapak/url-router.git'
 
-    libraryVersion = '1.0.8'
+    libraryVersion = '1.1.0'
 
     developerId = 'mrhabibi'
     developerName = 'Muhammad Rizky Habibi'
@@ -28,8 +28,6 @@ ext {
 }
 
 buildscript {
-    ext.kotlin_version = '1.2.21'
-    ext.dokka_version = '0.9.10'
 
     repositories {
         maven {
@@ -55,7 +53,7 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 100008
+        versionCode 100100
         versionName "$libraryVersion"
 
     }
