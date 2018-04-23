@@ -9,13 +9,13 @@ import android.os.Bundle
 
 class Result(val context: Context,
              val url: String,
-             val variables: CastMap,
-             val queries: CastMap,
+             val variables: ParamMap,
+             val queries: ParamsMap,
              val fragment: String?,
              val args: Bundle?)
 
-class RawResult(val variables: CastMap = CastMap(),
-                val queries: CastMap = CastMap(),
+class RawResult(val variables: ParamMap = ParamMap(),
+                val queries: ParamsMap = ParamsMap(),
                 var fragment: String? = null) {
 
     fun cook(context: Context,

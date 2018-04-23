@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import java.util.*
 import java.util.regex.Pattern
 
 typealias PreProcessor = (Result) -> String?
@@ -180,7 +181,8 @@ class Router {
                 if (!checkOnly) {
 
                     // Do global interception if it's set
-                    globalInterceptor.invoke(interceptor ?: DEFAULT_INTERCEPTOR, it.processor, result)
+                    globalInterceptor.invoke(interceptor
+                            ?: DEFAULT_INTERCEPTOR, it.processor, result)
                 }
 
                 Log.i(TAG, "Routing url " + url + " using " + it.pattern)
@@ -251,7 +253,7 @@ class Router {
 
             // Put parsed variable value into the container
             varNames.forEachIndexed { index, name ->
-                rawResult.variables[name] = bodyMatcher.group(index + 1)
+                rawResult.variables.put(name, bodyMatcher.group(index + 1))
             }
 
             val uri = Uri.parse(url)
@@ -266,7 +268,7 @@ class Router {
 
                     // Put into the container
                     names.forEach {
-                        rawResult.queries[it] = uri.getQueryParameter(it)
+                        rawResult.queries[it] = uri.getQueryParameters(it)
                     }
                 } catch (ignored: Exception) {
                     // Exception never been catched, internal bug from android (?)
