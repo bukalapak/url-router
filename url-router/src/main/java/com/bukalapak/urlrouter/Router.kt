@@ -51,7 +51,8 @@ class Router {
      * @param processor  Invocation
      */
     fun map(expression: String, processor: Processor) {
-        processors = processors.plus(Expression(expression, processor))
+        assertExpression(expression)
+        processors = processors.plus(Expression(expression, processor, 1))
     }
 
     /**
@@ -61,7 +62,8 @@ class Router {
      * @param processor   Invocation
      */
     fun map(expressions: List<String>, processor: Processor) {
-        processors = processors.plus(expressions.map { Expression(it, processor) })
+        assertExpression(expressions)
+        processors = processors.plus(expressions.map { Expression(it, processor, expressions.size) })
     }
 
     /**
@@ -71,7 +73,8 @@ class Router {
      * @param preProcessor  Invocation
      */
     fun preMap(expression: String, preProcessor: PreProcessor) {
-        preProcessors = preProcessors.plus(Expression(expression, preProcessor))
+        assertExpression(expression)
+        preProcessors = preProcessors.plus(Expression(expression, preProcessor, 1))
     }
 
     /**
@@ -87,6 +90,11 @@ class Router {
                postfixes: List<String> = emptyList(),
                processor: PreProcessor) {
 
+        assertExpression(expressions)
+        val count = if (prefixes.isEmpty()) 1 else prefixes.size *
+                expressions.size *
+                if (postfixes.isEmpty()) 1 else postfixes.size
+
         prefixes.forEach { prefix ->
             expressions.forEach { expression ->
                 postfixes.forEach { postfix ->
@@ -94,10 +102,19 @@ class Router {
                             prefix.nullToEmpty() +
                                     expression +
                                     postfix.nullToEmpty(),
-                            processor))
+                            processor, count))
                 }
             }
         }
+    }
+
+    private fun assertExpression(expression: String) {
+        assertExpression(listOf(expression))
+    }
+
+    private fun assertExpression(expressions: List<String>) {
+        if (expressions.isEmpty()) throw IllegalArgumentException("List of expressions is empty")
+        if (expressions.any { it.isBlank() }) throw IllegalArgumentException("One of expression is blank")
     }
 
     /**
@@ -199,11 +216,16 @@ class Router {
     private fun <P> generateComparator(): Comparator<Expression<P>> = Comparator({ expression1, expression2 ->
 
         // Replace all variable into * first
-        val expr1 = expression1.pattern.replace(VARIABLE_REGEX.toRegex(), "*")
-        val expr2 = expression2.pattern.replace(VARIABLE_REGEX.toRegex(), "*")
+        val pattern1 = expression1.pattern.replace(VARIABLE_REGEX.toRegex(), "*")
+        val pattern2 = expression2.pattern.replace(VARIABLE_REGEX.toRegex(), "*")
 
-        // Return which is the longest expression
-        expr2.length - expr1.length
+        // Pattern length priority #1
+        val patternLength = pattern2.length - pattern1.length
+
+        // Member count priority #2
+        val memberCount = expression1.memberCount - expression2.memberCount
+
+        if (patternLength == 0) memberCount else patternLength
     })
 
     /**
@@ -324,10 +346,10 @@ class Router {
          * @return Router instance
          */
         val INSTANCE: Router
-            get() {
-                val r = router ?: Router()
-                router = r
-                return r
+            get() = router ?: let {
+                val temp = Router()
+                router = temp
+                temp
             }
     }
 }
