@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 ext {
+    gradle_version = '3.1.2'
     kotlin_version = '1.2.41'
     dokka_version = '0.9.10'
 }

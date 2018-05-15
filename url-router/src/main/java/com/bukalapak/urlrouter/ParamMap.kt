@@ -58,6 +58,7 @@ open class ParamMap : HashMap<String, List<String>>() {
     } else false
 }
 
+@Suppress("DEPRECATION")
 class ParamsMap : ParamMap() {
 
     fun getStringList(key: String): List<String> = if (containsKey(key)) {
