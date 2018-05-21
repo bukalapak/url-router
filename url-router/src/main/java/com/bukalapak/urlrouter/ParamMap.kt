@@ -54,7 +54,7 @@ open class ParamMap : HashMap<String, List<String>>() {
 
     fun getBoolean(key: String): Boolean = if (containsKey(key)) {
         val value = super.get(key)?.get(0)
-        !value.equals("false", true) || !value.equals("0", true)
+        !value.equals("false", true) && !value.equals("0", true)
     } else false
 }
 
@@ -98,6 +98,6 @@ class ParamsMap : ParamMap() {
     } else emptyList()
 
     fun getBooleanList(key: String): List<Boolean> = if (containsKey(key)) {
-        super.get(key)?.map { !it.equals("false", true) || !it.equals("0", true) } ?: emptyList()
+        super.get(key)?.map { !it.equals("false", true) && !it.equals("0", true) } ?: emptyList()
     } else emptyList()
 }

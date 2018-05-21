@@ -110,7 +110,7 @@ val nonloginUserRouter = Router()
 Add this line in your `build.gradle` file:
 
 ```
-compile 'com.bukalapak:url-router:1.1.4'
+compile 'com.bukalapak:url-router:1.1.5'
 ```
 
 This library is hosted in the [JCenter repository](https://bintray.com/bukalapak/maven), so you have to ensure that the repository is included:
