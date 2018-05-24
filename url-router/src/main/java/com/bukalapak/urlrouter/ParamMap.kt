@@ -17,12 +17,12 @@ open class ParamMap : HashMap<String, List<String>>() {
     }
 
     fun getString(key: String): String = if (containsKey(key)) {
-        super.get(key)?.get(0) ?: ""
+        super.get(key)?.firstOrNull() ?: ""
     } else ""
 
     fun getLong(key: String): Long = if (containsKey(key)) {
         try {
-            super.get(key)?.get(0)?.toLong() ?: 0L
+            super.get(key)?.firstOrNull()?.toLong() ?: 0L
         } catch (ex: Exception) {
             0L
         }
@@ -30,7 +30,7 @@ open class ParamMap : HashMap<String, List<String>>() {
 
     fun getInt(key: String): Int = if (containsKey(key)) {
         try {
-            super.get(key)?.get(0)?.toInt() ?: 0
+            super.get(key)?.firstOrNull()?.toInt() ?: 0
         } catch (ex: Exception) {
             0
         }
@@ -38,7 +38,7 @@ open class ParamMap : HashMap<String, List<String>>() {
 
     fun getFloat(key: String): Float = if (containsKey(key)) {
         try {
-            super.get(key)?.get(0)?.toFloat() ?: 0.0F
+            super.get(key)?.firstOrNull()?.toFloat() ?: 0.0F
         } catch (ex: Exception) {
             0.0F
         }
@@ -46,14 +46,14 @@ open class ParamMap : HashMap<String, List<String>>() {
 
     fun getDouble(key: String): Double = if (containsKey(key)) {
         try {
-            super.get(key)?.get(0)?.toDouble() ?: 0.0
+            super.get(key)?.firstOrNull()?.toDouble() ?: 0.0
         } catch (ex: Exception) {
             0.0
         }
     } else 0.0
 
     fun getBoolean(key: String): Boolean = if (containsKey(key)) {
-        val value = super.get(key)?.get(0)
+        val value = super.get(key)?.firstOrNull()
         !value.equals("false", true) && !value.equals("0", true)
     } else false
 }
