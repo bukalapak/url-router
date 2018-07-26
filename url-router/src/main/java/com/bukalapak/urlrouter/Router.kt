@@ -49,10 +49,11 @@ class Router {
      *
      * @param expression Expression
      * @param processor  Invocation
+     * @param parentExpression  Scheme and host expression
      */
-    fun map(expression: String, processor: Processor) {
+    private fun map(expression: String, processor: Processor, parentExpression: String? = null) {
         assertExpression(expression)
-        processors = processors.plus(Expression(expression, processor, 1))
+        processors = processors.plus(Expression(expression, processor, 1, parentExpression))
     }
 
     /**
@@ -60,21 +61,26 @@ class Router {
      *
      * @param expressions Expressions
      * @param processor   Invocation
+     * @param parentExpression  Scheme and host expression
      */
-    fun map(expressions: List<String>, processor: Processor) {
+    private fun map(expressions: List<String>, processor: Processor, parentExpression: String? = null) {
         assertExpression(expressions)
-        processors = processors.plus(expressions.map { Expression(it, processor, expressions.size) })
+        processors = processors.plus(expressions.map { Expression(it, processor, expressions.size, parentExpression) })
     }
 
     /**
      * Scheme and host processor for single expression in single processor
      *
      * @param expression Expression
+     * @param routerMap  Multiple path and query processor for multiple expression in singgle processor
      * @param preProcessor  Invocation
      */
-    fun preMap(expression: String, preProcessor: PreProcessor) {
+    fun preMap(expression: String, routerMap: List<RouterMap> = emptyList(), preProcessor: PreProcessor) {
         assertExpression(expression)
         preProcessors = preProcessors.plus(Expression(expression, preProcessor, 1))
+        routerMap.forEach {
+            map(it.expression, it.processor, expression)
+        }
     }
 
     /**
@@ -83,11 +89,13 @@ class Router {
      * @param prefixes    Prefixes
      * @param expressions Expressions
      * @param postfixes   Postfixes
+     * @param routerMap   Multiple path and query processor for multiple expression in singgle processor
      * @param processor   Processor
      */
     fun preMap(prefixes: List<String> = emptyList(),
                expressions: List<String>,
                postfixes: List<String> = emptyList(),
+               routerMap: List<RouterMap> = emptyList(),
                processor: PreProcessor) {
 
         assertExpression(expressions)
@@ -95,15 +103,22 @@ class Router {
                 expressions.size *
                 if (postfixes.isEmpty()) 1 else postfixes.size
 
+        val pattern = mutableListOf<String>()
         prefixes.forEach { prefix ->
             expressions.forEach { expression ->
                 postfixes.forEach { postfix ->
+                    pattern.add(prefix.nullToEmpty() + expression + postfix.nullToEmpty())
                     preProcessors = preProcessors.plus(Expression(
                             prefix.nullToEmpty() +
                                     expression +
                                     postfix.nullToEmpty(),
                             processor, count))
                 }
+            }
+        }
+        pattern.forEach { pattern ->
+            routerMap.forEach {
+                map(it.expression, it.processor, pattern)
             }
         }
     }
@@ -151,7 +166,7 @@ class Router {
 
                     // processedUrl == null means that the preMap won't be continued to map
                     return if (processedUrl != null) {
-                        routeUrl(context, url, processedUrl, interceptor, args)
+                        routeUrl(context, url, processedUrl, interceptor, args, it.pattern)
                     } else {
                         Log.i(TAG, "Routing url " + url + " using " + it.pattern)
                         true
@@ -172,18 +187,23 @@ class Router {
      * @param url          URL
      * @param processedUrl Processed sub URL from preMap
      * @param args         Optional arguments
+     * @param parentPattern Scheme and host Expression
      * @return Has routing path
      */
     private fun routeUrl(context: Context,
                          url: String,
                          processedUrl: String,
                          interceptor: Interceptor?,
-                         args: Bundle?): Boolean {
+                         args: Bundle?,
+                         parentPattern: String? = null): Boolean {
+
+        var processorFiltered = processors.filter { it.parentPattern.equals(parentPattern) }
 
         // Do sorting first
-        processors = processors.sortedWith(generateComparator())
+        processorFiltered = processorFiltered.sortedWith(generateComparator())
 
-        processors.forEach {
+
+        processorFiltered.forEach {
             val rawResult = RawResult()
 
             // Check the map matching

@@ -5,4 +5,5 @@ package com.bukalapak.urlrouter
  */
 internal class Expression<P>(val pattern: String,
                              val processor: P,
-                             val memberCount: Int)
+                             val memberCount: Int,
+                             val parentPattern: String? = null)
