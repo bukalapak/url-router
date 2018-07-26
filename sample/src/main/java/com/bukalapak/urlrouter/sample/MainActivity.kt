@@ -18,9 +18,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        editTextUrl = findViewById(R.id.edittext_url) as EditText
-        buttonRoute = findViewById(R.id.button_route) as Button
-        textViewResult = findViewById(R.id.textview_result) as TextView
+        editTextUrl = findViewById(R.id.edittext_url)
+        buttonRoute = findViewById(R.id.button_route)
+        textViewResult = findViewById(R.id.textview_result)
 
         buttonRoute.setOnClickListener { _ ->
             Router.INSTANCE.route(this, editTextUrl.text.toString())
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     private fun setMapping() {
         val router = Router.INSTANCE
 
-        router.preMap("*://<subdomain:[a-z]+>.mysite.com/*", {
+        router.preMap("*://<subdomain:[a-z]+>.mysite.com/*") {
             val subdomain = it.variables.getString("subdomain")
             if (subdomain == "blog") {
                 displayResult("Launch intent: " + it.url)
@@ -40,34 +40,34 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Uri.parse(it.url).path // Continue routing
             }
-        })
+        }
 
         // https://www.mysite.com/about
-        router.map("/about", { displayResult("Open about page") })
+        router.map("/about") { displayResult("Open about page") }
 
         // https://www.mysite.com/promo/tas-keren-pria
-        router.map("/promo/*", { displayResult("Open promo page") })
+        router.map("/promo/*") { displayResult("Open promo page") }
 
         // https://www.mysite.com/promo/tas-keren-pria/discounted
-        router.map("/promo/*/discounted", { displayResult("Open discounted promo page") })
+        router.map("/promo/*/discounted") { displayResult("Open discounted promo page") }
 
         // https://www.mysite.com/register?referrer=anonymous
-        router.map("/register", {
+        router.map("/register") {
             val referrer = it.queries.getString("referrer")
-            displayResult("Open registration page with referrer " + referrer)
-        })
+            displayResult("Open registration page with referrer $referrer")
+        }
 
         // https://www.mysite.com/register?referrer=anonymous
-        router.map("/transaction/<transaction_id>/view", {
+        router.map("/transaction/<transaction_id>/view") {
             val transactionId = it.variables.getLong("transaction_id")
-            displayResult("Open transaction detail page " + transactionId)
-        })
+            displayResult("Open transaction detail page $transactionId")
+        }
 
         // https://www.mysite.com/product/kj9fd8-tas-paling-keren-masa-kini
-        router.map("/product/<product_id:[a-z0-9]+>-*", {
+        router.map("/product/<product_id:[a-z0-9]+>-*") {
             val productId = it.variables.getString("product_id")
-            displayResult("Open product detail page " + productId)
-        })
+            displayResult("Open product detail page $productId")
+        }
     }
 
     private fun displayResult(result: String) {
