@@ -2,6 +2,6 @@
 
 ext {
     gradle_version = '3.1.2'
-    kotlin_version = '1.2.41'
+    kotlin_version = '1.2.51'
     dokka_version = '0.9.10'
 }
