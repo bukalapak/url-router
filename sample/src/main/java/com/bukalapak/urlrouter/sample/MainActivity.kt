@@ -131,6 +131,86 @@ class MainActivity : AppCompatActivity() {
             }
             Uri.parse(url).path // Continue routing
         }
+
+        router.preMap("*://third.mysite.com/*", {
+            Uri.parse(it.url).path // Continue routing
+        }, {
+            expression = listOf("/about")
+            processor = {
+                displayResult("Open third about page")
+            }
+        }, {
+            expression = listOf("/promo/*")
+            processor = {
+                displayResult("Open third promo page")
+            }
+        }, {
+            expression = listOf("/promo/*/discounted")
+            processor = {
+                displayResult("Open third discounted promo page")
+            }
+        }, {
+            expression = listOf("/register")
+            processor = {
+                val referrer = it.queries.getString("referrer")
+                displayResult("Open third registration page with referrer $referrer")
+            }
+        }, {
+            expression = listOf("/transaction/<transaction_id>/view")
+            processor = {
+                val transactionId = it.variables.getLong("transaction_id")
+                displayResult("Open third transaction detail page $transactionId")
+            }
+        }, {
+            expression = listOf("/product/<product_id:[a-z0-9]+>-*")
+            processor = {
+                val productId = it.variables.getString("product_id")
+                displayResult("Open third product detail page $productId")
+            }
+        })
+
+        router.preMap(listOf("*://", ""),
+                listOf("fourth.mysite.com"),
+                listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>"), {
+            var url = it.url
+            if (!Pattern.matches("\\w+://.+", it.url)) {
+                url = "https://" + url
+            }
+            Uri.parse(url).path // Continue routing
+        }, {
+            expression = listOf("/about")
+            processor = {
+                displayResult("Open fourth about page")
+            }
+        }, {
+            expression = listOf("/promo/*")
+            processor = {
+                displayResult("Open fourth promo page")
+            }
+        }, {
+            expression = listOf("/promo/*/discounted")
+            processor = {
+                displayResult("Open fourth discounted promo page")
+            }
+        }, {
+            expression = listOf("/register")
+            processor = {
+                val referrer = it.queries.getString("referrer")
+                displayResult("Open fourth registration page with referrer $referrer")
+            }
+        }, {
+            expression = listOf("/transaction/<transaction_id>/view")
+            processor = {
+                val transactionId = it.variables.getLong("transaction_id")
+                displayResult("Open fourth transaction detail page $transactionId")
+            }
+        }, {
+            expression = listOf("/product/<product_id:[a-z0-9]+>-*")
+            processor = {
+                val productId = it.variables.getString("product_id")
+                displayResult("Open fourth product detail page $productId")
+            }
+        })
     }
 
     private fun displayResult(result: String) {

@@ -1,4 +1,4 @@
 package com.bukalapak.urlrouter
 
-class RouterMap(val expression: List<String>,
-                val processor: Processor)
+class RouterMap(var expression: List<String> = emptyList(),
+                var processor: Processor = {})

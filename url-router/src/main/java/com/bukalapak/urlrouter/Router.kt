@@ -84,6 +84,19 @@ class Router {
     }
 
     /**
+     * To simplify the other method
+     */
+    fun preMap(expression: String, preProcessor: PreProcessor, vararg routerMap: RouterMap.() -> Unit) {
+        assertExpression(expression)
+        preProcessors = preProcessors.plus(Expression(expression, preProcessor, 1))
+        routerMap.forEach {
+            val router = RouterMap()
+            router.it()
+            map(router.expression, router.processor, expression)
+        }
+    }
+
+    /**
      * Schemes and host processor for multiple expressions with prefixes and postfixes in single processor
      *
      * @param prefixes    Prefixes
@@ -119,6 +132,41 @@ class Router {
         pattern.forEach { pattern ->
             routerMap.forEach {
                 map(it.expression, it.processor, pattern)
+            }
+        }
+    }
+
+    /**
+     * To simplifying the other method
+     */
+    fun preMap(prefixes: List<String> = emptyList(),
+               expressions: List<String>,
+               postfixes: List<String> = emptyList(),
+               processor: PreProcessor,
+               vararg routerMap: RouterMap.() -> Unit) {
+
+        assertExpression(expressions)
+        val count = if (prefixes.isEmpty()) 1 else prefixes.size *
+                expressions.size *
+                if (postfixes.isEmpty()) 1 else postfixes.size
+
+        val pattern = mutableListOf<String>()
+        prefixes.forEach { prefix ->
+            expressions.forEach { expression ->
+                postfixes.forEach { postfix ->
+                    pattern.add(prefix.nullToEmpty() + expression + postfix.nullToEmpty())
+                    preProcessors = preProcessors.plus(Expression(
+                            prefix.nullToEmpty() +
+                                    expression +
+                                    postfix.nullToEmpty(),
+                            processor, count))
+                }
+            }
+        }
+        pattern.forEach { pattern ->
+            routerMap.forEach {val router = RouterMap()
+                router.it()
+                map(router.expression, router.processor, pattern)
             }
         }
     }
