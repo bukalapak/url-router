@@ -9,12 +9,12 @@ import android.os.Bundle
 
 class Result(val context: Context,
              val url: String,
-             val variables: ParamMap,
+             val variables: OptParamMap,
              val queries: ParamsMap,
              val fragment: String?,
              val args: Bundle?)
 
-class RawResult(val variables: ParamMap = ParamMap(),
+class RawResult(val variables: OptParamMap = OptParamMap(),
                 val queries: ParamsMap = ParamsMap(),
                 var fragment: String? = null) {
 
