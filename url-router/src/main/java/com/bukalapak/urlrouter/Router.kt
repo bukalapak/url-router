@@ -51,7 +51,7 @@ class Router {
      * @param processor  Invocation
      * @param parentExpression  Scheme and host expression
      */
-    private fun map(expression: String, processor: Processor, parentExpression: String? = null) {
+    private fun pathMap(expression: String, processor: Processor, parentExpression: String? = null) {
         assertExpression(expression)
         processors = processors.plus(Expression(expression, processor, 1, parentExpression))
     }
@@ -63,7 +63,7 @@ class Router {
      * @param processor   Invocation
      * @param parentExpression  Scheme and host expression
      */
-    private fun map(expressions: List<String>, processor: Processor, parentExpression: String? = null) {
+    private fun pathMap(expressions: List<String>, processor: Processor, parentExpression: String? = null) {
         assertExpression(expressions)
         processors = processors.plus(expressions.map { Expression(it, processor, expressions.size, parentExpression) })
     }
@@ -75,24 +75,24 @@ class Router {
      * @param routerMap  Multiple path and query processor for multiple expression in singgle processor
      * @param preProcessor  Invocation
      */
-    fun preMap(expression: String, routerMap: List<RouterMap> = emptyList(), preProcessor: PreProcessor) {
+    fun map(expression: String, routerMap: List<RouterMap> = emptyList(), preProcessor: PreProcessor) {
         assertExpression(expression)
         preProcessors = preProcessors.plus(Expression(expression, preProcessor, 1))
         routerMap.forEach {
-            map(it.expression, it.processor, expression)
+            pathMap(it.expression, it.processor, expression)
         }
     }
 
     /**
      * To simplify the other method
      */
-    fun preMap(expression: String, preProcessor: PreProcessor, vararg routerMap: RouterMap.() -> Unit) {
+    fun map(expression: String, preProcessor: PreProcessor, vararg routerMap: RouterMap.() -> Unit) {
         assertExpression(expression)
         preProcessors = preProcessors.plus(Expression(expression, preProcessor, 1))
         routerMap.forEach {
             val router = RouterMap()
             router.it()
-            map(router.expression, router.processor, expression)
+            pathMap(router.expression, router.processor, expression)
         }
     }
 
@@ -105,7 +105,7 @@ class Router {
      * @param routerMap   Multiple path and query processor for multiple expression in singgle processor
      * @param processor   Processor
      */
-    fun preMap(prefixes: List<String> = emptyList(),
+    fun map(prefixes: List<String> = emptyList(),
                expressions: List<String>,
                postfixes: List<String> = emptyList(),
                routerMap: List<RouterMap> = emptyList(),
@@ -131,7 +131,7 @@ class Router {
         }
         pattern.forEach { pattern ->
             routerMap.forEach {
-                map(it.expression, it.processor, pattern)
+                pathMap(it.expression, it.processor, pattern)
             }
         }
     }
@@ -139,7 +139,7 @@ class Router {
     /**
      * To simplifying the other method
      */
-    fun preMap(prefixes: List<String> = emptyList(),
+    fun map(prefixes: List<String> = emptyList(),
                expressions: List<String>,
                postfixes: List<String> = emptyList(),
                processor: PreProcessor,
@@ -166,7 +166,7 @@ class Router {
         pattern.forEach { pattern ->
             routerMap.forEach {val router = RouterMap()
                 router.it()
-                map(router.expression, router.processor, pattern)
+                pathMap(router.expression, router.processor, pattern)
             }
         }
     }

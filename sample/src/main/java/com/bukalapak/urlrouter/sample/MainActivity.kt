@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             displayResult("Open product detail page $productId")
         })
 
-        router.preMap(listOf("*://", ""),
+        router.map(listOf("*://", ""),
                 listOf("<subdomain:\\[a-z]+>.mysite.com", "mysite.com"),
                 listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>"),
                 firstMap) {
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
             displayResult("Open second product detail page $productId")
         })
 
-        router.preMap(listOf("*://", ""),
+        router.map(listOf("*://", ""),
                 listOf("second.mysite.com"),
                 listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>"),
                 secondMap) {
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
             Uri.parse(url).path // Continue routing
         }
 
-        router.preMap("*://third.mysite.com/*", {
+        router.map("*://third.mysite.com/*", {
             Uri.parse(it.url).path // Continue routing
         }, {
             expression = listOf("/about")
@@ -169,7 +169,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        router.preMap(listOf("*://", ""),
+        router.map(listOf("*://", ""),
                 listOf("fourth.mysite.com"),
                 listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>"), {
             var url = it.url
