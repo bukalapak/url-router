@@ -105,21 +105,19 @@ class Router {
      * @param routerMap   Multiple path and query processor for multiple expression in singgle processor
      * @param processor   Processor
      */
-    fun map(prefixes: List<String> = emptyList(),
-               expressions: List<String>,
-               postfixes: List<String> = emptyList(),
-               routerMap: List<RouterMap> = emptyList(),
-               processor: PreProcessor) {
+    fun map(host: Host,
+            routerMap: List<RouterMap> = emptyList(),
+            processor: PreProcessor) {
 
-        assertExpression(expressions)
-        val count = if (prefixes.isEmpty()) 1 else prefixes.size *
-                expressions.size *
-                if (postfixes.isEmpty()) 1 else postfixes.size
+        assertExpression(host.expressions)
+        val count = if (host.prefixes.isEmpty()) 1 else host.prefixes.size *
+                host.expressions.size *
+                if (host.postfixes.isEmpty()) 1 else host.postfixes.size
 
         val pattern = mutableListOf<String>()
-        prefixes.forEach { prefix ->
-            expressions.forEach { expression ->
-                postfixes.forEach { postfix ->
+        host.prefixes.forEach { prefix ->
+            host.expressions.forEach { expression ->
+                host.postfixes.forEach { postfix ->
                     pattern.add(prefix.nullToEmpty() + expression + postfix.nullToEmpty())
                     preProcessors = preProcessors.plus(Expression(
                             prefix.nullToEmpty() +
@@ -139,21 +137,19 @@ class Router {
     /**
      * To simplifying the other method
      */
-    fun map(prefixes: List<String> = emptyList(),
-               expressions: List<String>,
-               postfixes: List<String> = emptyList(),
-               processor: PreProcessor,
-               vararg routerMap: RouterMap.() -> Unit) {
+    fun map(host: Host,
+            processor: PreProcessor,
+            vararg routerMap: RouterMap.() -> Unit) {
 
-        assertExpression(expressions)
-        val count = if (prefixes.isEmpty()) 1 else prefixes.size *
-                expressions.size *
-                if (postfixes.isEmpty()) 1 else postfixes.size
+        assertExpression(host.expressions)
+        val count = if (host.prefixes.isEmpty()) 1 else host.prefixes.size *
+                host.expressions.size *
+                if (host.postfixes.isEmpty()) 1 else host.postfixes.size
 
         val pattern = mutableListOf<String>()
-        prefixes.forEach { prefix ->
-            expressions.forEach { expression ->
-                postfixes.forEach { postfix ->
+        host.prefixes.forEach { prefix ->
+            host.expressions.forEach { expression ->
+                host.postfixes.forEach { postfix ->
                     pattern.add(prefix.nullToEmpty() + expression + postfix.nullToEmpty())
                     preProcessors = preProcessors.plus(Expression(
                             prefix.nullToEmpty() +
@@ -164,7 +160,8 @@ class Router {
             }
         }
         pattern.forEach { pattern ->
-            routerMap.forEach {val router = RouterMap()
+            routerMap.forEach {
+                val router = RouterMap()
                 router.it()
                 pathMap(router.expression, router.processor, pattern)
             }

@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import com.bukalapak.urlrouter.Host
 import com.bukalapak.urlrouter.Router
 import com.bukalapak.urlrouter.RouterMap
 import java.util.regex.Pattern
@@ -69,10 +70,11 @@ class MainActivity : AppCompatActivity() {
             displayResult("Open product detail page $productId")
         })
 
-        router.map(listOf("*://", ""),
+        router.map(Host(
+                listOf("*://", ""),
                 listOf("<subdomain:\\[a-z]+>.mysite.com", "mysite.com"),
-                listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>"),
-                firstMap) {
+                listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>")
+        ), firstMap) {
             val subdomain = it.variables.getString("subdomain")
             if (subdomain == "www") {
                 var url = it.url
@@ -121,10 +123,11 @@ class MainActivity : AppCompatActivity() {
             displayResult("Open second product detail page $productId")
         })
 
-        router.map(listOf("*://", ""),
+        router.map(Host(
+                listOf("*://", ""),
                 listOf("second.mysite.com"),
-                listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>"),
-                secondMap) {
+                listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>")
+        ), secondMap) {
             var url = it.url
             if (!Pattern.matches("\\w+://.+", it.url)) {
                 url = "https://" + url
@@ -169,9 +172,11 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        router.map(listOf("*://", ""),
+        router.map(Host(
+                listOf("*://", ""),
                 listOf("fourth.mysite.com"),
-                listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>"), {
+                listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>")
+        ), {
             var url = it.url
             if (!Pattern.matches("\\w+://.+", it.url)) {
                 url = "https://" + url
