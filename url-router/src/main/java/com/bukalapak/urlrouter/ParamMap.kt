@@ -52,7 +52,7 @@ open class ParamMap : HashMap<String, List<String>>() {
 
     fun getBoolean(key: String): Boolean? = if (containsKey(key)) {
         val value = super.get(key)?.firstOrNull()
-        value.equals("true", true) && value.equals("1", true)
+        value.equals("true", true) || value.equals("1", true)
     } else null
 }
 
@@ -96,7 +96,7 @@ open class OptParamMap : ParamMap() {
 
     fun optBoolean(key: String): Boolean = if (containsKey(key)) {
         val value = super.get(key)?.firstOrNull()
-        value.equals("true", true) && value.equals("1", true)
+        value.equals("true", true) || value.equals("1", true)
     } else false
 }
 
