@@ -7,7 +7,7 @@ import android.util.Log
 import java.util.*
 import java.util.regex.Pattern
 
-typealias PreProcessor = (Result) -> String?
+typealias PreProcessor = (Result) -> Unit
 typealias Processor = (Result) -> Unit
 typealias GlobalInterceptor = (Interceptor, Processor, Result) -> Unit
 typealias Interceptor = (Processor, Result) -> Unit
@@ -75,7 +75,7 @@ class Router {
      * @param routerMap  Multiple path and query processor for multiple expression in singgle processor
      * @param preProcessor  Invocation
      */
-    fun map(expression: String, routerMap: List<RouterMap> = emptyList(), preProcessor: PreProcessor) {
+    fun map(expression: String, preProcessor: PreProcessor = {}, routerMap: List<RouterMap> = emptyList()) {
         assertExpression(expression)
         preProcessors = preProcessors.plus(Expression(expression, preProcessor, 1))
         routerMap.forEach {
@@ -106,8 +106,8 @@ class Router {
      * @param processor   Processor
      */
     fun map(host: Host,
-            routerMap: List<RouterMap> = emptyList(),
-            processor: PreProcessor) {
+            processor: PreProcessor = {},
+            routerMap: List<RouterMap> = emptyList()) {
 
         assertExpression(host.expressions)
         val count = if (host.prefixes.isEmpty()) 1 else host.prefixes.size *
@@ -207,10 +207,16 @@ class Router {
 
                 if (match) {
                     val result = rawResult.cook(context, url, args)
-                    val processedUrl = it.processor.invoke(result)
+                    it.processor.invoke(result)
+
+                    var urlWithScheme = url
+                    if (!Pattern.matches("\\w+://.+", url)) {
+                        urlWithScheme = "https://" + urlWithScheme
+                    }
+                    val processedUrl = Uri.parse(urlWithScheme).path
 
                     // processedUrl == null means that the preMap won't be continued to map
-                    return if (processedUrl != null) {
+                    return if (processedUrl != null && !processedUrl.equals("") && !processedUrl.equals("/")) {
                         routeUrl(context, url, processedUrl, interceptor, args, it.pattern)
                     } else {
                         Log.i(TAG, "Routing url " + url + " using " + it.pattern)
