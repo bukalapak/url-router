@@ -69,101 +69,34 @@ class Router {
     }
 
     /**
-     * Scheme and host processor for single expression in single processor
      *
-     * @param expression Expression
-     * @param routerMap  Multiple path and query processor for multiple expression in singgle processor
-     * @param preProcessor  Invocation
      */
-    fun map(expression: String, preProcessor: PreProcessor = {}, routerMap: List<RouterMap> = emptyList()) {
-        assertExpression(expression)
-        preProcessors = preProcessors.plus(Expression(expression, preProcessor, 1))
-        routerMap.forEach {
-            pathMap(it.expression, it.processor, expression)
-        }
-    }
+    fun map(routeMapBuilder: RouterMap.Builder.() -> Unit) {
+        val builder = RouterMap.Builder()
+        builder.routeMapBuilder()
+        val routerMap = builder.build()
 
-    /**
-     * To simplify the other method
-     */
-    fun map(expression: String, preProcessor: PreProcessor, vararg routerMap: RouterMap.() -> Unit) {
-        assertExpression(expression)
-        preProcessors = preProcessors.plus(Expression(expression, preProcessor, 1))
-        routerMap.forEach {
-            val router = RouterMap()
-            router.it()
-            pathMap(router.expression, router.processor, expression)
-        }
-    }
-
-    /**
-     * Schemes and host processor for multiple expressions with prefixes and postfixes in single processor
-     *
-     * @param prefixes    Prefixes
-     * @param expressions Expressions
-     * @param postfixes   Postfixes
-     * @param routerMap   Multiple path and query processor for multiple expression in singgle processor
-     * @param processor   Processor
-     */
-    fun map(host: Host,
-            processor: PreProcessor = {},
-            routerMap: List<RouterMap> = emptyList()) {
-
-        assertExpression(host.expressions)
-        val count = if (host.prefixes.isEmpty()) 1 else host.prefixes.size *
-                host.expressions.size *
-                if (host.postfixes.isEmpty()) 1 else host.postfixes.size
+        assertExpression(routerMap.expressions)
+        val count = if (routerMap.prefixes.isEmpty()) 1 else routerMap.prefixes.size *
+                routerMap.expressions.size *
+                if (routerMap.postfixes.isEmpty()) 1 else routerMap.postfixes.size
 
         val pattern = mutableListOf<String>()
-        host.prefixes.forEach { prefix ->
-            host.expressions.forEach { expression ->
-                host.postfixes.forEach { postfix ->
+        routerMap.prefixes.forEach { prefix ->
+            routerMap.expressions.forEach { expression ->
+                routerMap.postfixes.forEach { postfix ->
                     pattern.add(prefix.nullToEmpty() + expression + postfix.nullToEmpty())
                     preProcessors = preProcessors.plus(Expression(
                             prefix.nullToEmpty() +
                                     expression +
                                     postfix.nullToEmpty(),
-                            processor, count))
+                            routerMap.preProcessor, count))
                 }
             }
         }
         pattern.forEach { pattern ->
-            routerMap.forEach {
-                pathMap(it.expression, it.processor, pattern)
-            }
-        }
-    }
-
-    /**
-     * To simplifying the other method
-     */
-    fun map(host: Host,
-            processor: PreProcessor,
-            vararg routerMap: RouterMap.() -> Unit) {
-
-        assertExpression(host.expressions)
-        val count = if (host.prefixes.isEmpty()) 1 else host.prefixes.size *
-                host.expressions.size *
-                if (host.postfixes.isEmpty()) 1 else host.postfixes.size
-
-        val pattern = mutableListOf<String>()
-        host.prefixes.forEach { prefix ->
-            host.expressions.forEach { expression ->
-                host.postfixes.forEach { postfix ->
-                    pattern.add(prefix.nullToEmpty() + expression + postfix.nullToEmpty())
-                    preProcessors = preProcessors.plus(Expression(
-                            prefix.nullToEmpty() +
-                                    expression +
-                                    postfix.nullToEmpty(),
-                            processor, count))
-                }
-            }
-        }
-        pattern.forEach { pattern ->
-            routerMap.forEach {
-                val router = RouterMap()
-                router.it()
-                pathMap(router.expression, router.processor, pattern)
+            routerMap.path.forEach {
+                pathMap(it.path, it.processor, pattern)
             }
         }
     }
@@ -209,11 +142,7 @@ class Router {
                     val result = rawResult.cook(context, url, args)
                     it.processor.invoke(result)
 
-                    var urlWithScheme = url
-                    if (!Pattern.matches("\\w+://.+", url)) {
-                        urlWithScheme = "https://" + urlWithScheme
-                    }
-                    val processedUrl = Uri.parse(urlWithScheme).path
+                    val processedUrl = Uri.parse(getUrlWithScheme(url)).path
 
                     // processedUrl == null means that the preMap won't be continued to map
                     return if (processedUrl != null && !processedUrl.equals("") && !processedUrl.equals("/")) {
@@ -349,7 +278,7 @@ class Router {
                 rawResult.variables.put(name, bodyMatcher.group(index + 1))
             }
 
-            val uri = Uri.parse(url)
+            val uri = Uri.parse(getUrlWithScheme(url))
 
             // Parse the fragment
             rawResult.fragment = uri.fragment
@@ -370,6 +299,17 @@ class Router {
             }
             true
         } else false
+    }
+
+    /**
+     * add scheme https://
+     */
+    private fun getUrlWithScheme(url: String): String {
+        return if (!Pattern.matches("\\w+://.+", url)) {
+            "https://$url"
+        } else {
+            url
+        }
     }
 
     /**
