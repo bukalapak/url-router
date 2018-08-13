@@ -71,6 +71,37 @@ class Router {
     /**
      *
      */
+    fun map(routeMapBuilder: RouterMap.Builder) {
+        val routerMap = routeMapBuilder.build()
+
+        assertExpression(routerMap.expressions)
+        val count = if (routerMap.prefixes.isEmpty()) 1 else routerMap.prefixes.size *
+                routerMap.expressions.size *
+                if (routerMap.postfixes.isEmpty()) 1 else routerMap.postfixes.size
+
+        val pattern = mutableListOf<String>()
+        routerMap.prefixes.forEach { prefix ->
+            routerMap.expressions.forEach { expression ->
+                routerMap.postfixes.forEach { postfix ->
+                    pattern.add(prefix.nullToEmpty() + expression + postfix.nullToEmpty())
+                    preProcessors = preProcessors.plus(Expression(
+                            prefix.nullToEmpty() +
+                                    expression +
+                                    postfix.nullToEmpty(),
+                            routerMap.preProcessor, count))
+                }
+            }
+        }
+        pattern.forEach { pattern ->
+            routerMap.path.forEach {
+                pathMap(it.path, it.processor, pattern)
+            }
+        }
+    }
+
+    /**
+     *
+     */
     fun map(routeMapBuilder: RouterMap.Builder.() -> Unit) {
         val builder = RouterMap.Builder()
         builder.routeMapBuilder()

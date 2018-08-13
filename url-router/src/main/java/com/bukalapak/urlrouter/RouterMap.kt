@@ -1,11 +1,11 @@
 package com.bukalapak.urlrouter
 
-class RouterMap(
-        internal val prefixes: List<String>,
-        internal val expressions: List<String>,
-        internal val postfixes: List<String>,
-        internal val preProcessor: Processor,
-        internal val path: List<Path>) {
+class RouterMap private constructor(
+        val prefixes: List<String>,
+        val expressions: List<String>,
+        val postfixes: List<String>,
+        val preProcessor: Processor,
+        val path: List<Path>) {
 
     class Builder {
         private var prefixes: MutableList<String> = mutableListOf()
