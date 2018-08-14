@@ -64,8 +64,15 @@ class RouterMap private constructor(
             return this
         }
 
-        fun addPath(path: String, processor: Processor): Builder {
-            this.path.add(Path(path, processor))
+        fun addPath(expression: String, processor: Processor): Builder {
+            this.path.add(Path(expression, processor))
+            return this
+        }
+
+        fun addPath(expressions: List<String>, processor: Processor): Builder {
+            expressions.map {
+                this.path.add(Path(it, processor))
+            }
             return this
         }
 

@@ -94,7 +94,7 @@ class Router {
         }
         pattern.forEach { pattern ->
             routerMap.path.forEach {
-                pathMap(it.path, it.processor, pattern)
+                pathMap(it.expression, it.processor, pattern)
             }
         }
     }
@@ -127,7 +127,7 @@ class Router {
         }
         pattern.forEach { pattern ->
             routerMap.path.forEach {
-                pathMap(it.path, it.processor, pattern)
+                pathMap(it.expression, it.processor, pattern)
             }
         }
     }

@@ -1,3 +1,3 @@
 package com.bukalapak.urlrouter
 
-class Path(val path: String, val processor: Processor)
+class Path(val expression: String, val processor: Processor)
