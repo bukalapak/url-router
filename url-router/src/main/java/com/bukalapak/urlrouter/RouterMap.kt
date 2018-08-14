@@ -69,10 +69,8 @@ class RouterMap private constructor(
             return this
         }
 
-        fun addPath(expressions: List<String>, processor: Processor): Builder {
-            expressions.map {
-                this.path.add(Path(it, processor))
-            }
+        fun addPaths(expressions: List<String>, processor: Processor): Builder {
+            this.path.addAll(expressions.map{ Path(it, processor) })
             return this
         }
 
