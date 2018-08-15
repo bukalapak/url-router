@@ -16,39 +16,41 @@ open class ParamMap : HashMap<String, List<String>>() {
         return super.put(key, Arrays.asList(value))
     }
 
-    fun getString(key: String): String? = super.get(key)?.firstOrNull()
+    fun getString(key: String): String? = if (containsKey(key)) {
+        super.get(key)?.firstOrNull()
+    } else null
 
-    fun getLong(key: String): Long? {
-        return try {
+    fun getLong(key: String): Long? = if (containsKey(key)) {
+        try {
             super.get(key)?.firstOrNull()?.toLong()
         } catch (ex: Exception) {
             0L
         }
-    }
+    } else null
 
-    fun getInt(key: String): Int? {
-        return try {
+    fun getInt(key: String): Int? = if (containsKey(key)) {
+        try {
             super.get(key)?.firstOrNull()?.toInt()
         } catch (ex: Exception) {
             0
         }
-    }
+    } else null
 
-    fun getFloat(key: String): Float? {
-        return try {
+    fun getFloat(key: String): Float? = if (containsKey(key)) {
+        try {
             super.get(key)?.firstOrNull()?.toFloat()
         } catch (ex: Exception) {
             0.0F
         }
-    }
+    } else null
 
-    fun getDouble(key: String): Double? {
-        return try {
+    fun getDouble(key: String): Double? = if (containsKey(key)) {
+        try {
             super.get(key)?.firstOrNull()?.toDouble()
         } catch (ex: Exception) {
             0.0
         }
-    }
+    } else null
 
     fun getBoolean(key: String): Boolean? = if (containsKey(key)) {
         val value = super.get(key)?.firstOrNull()
@@ -102,39 +104,41 @@ open class OptParamMap : ParamMap() {
 
 open class ParamsMap : OptParamMap() {
 
-    fun getStringList(key: String): List<String>? = super.get(key)
+    fun getStringList(key: String): List<String>? = if (containsKey(key)) {
+        super.get(key)
+    } else null
 
-    fun getLongList(key: String): List<Long>? {
-        return try {
+    fun getLongList(key: String): List<Long>? = if (containsKey(key)) {
+        try {
             super.get(key)?.map { it.toLong() }
         } catch (ex: Exception) {
-            emptyList()
+            emptyList<Long>()
         }
-    }
+    } else null
 
-    fun getIntList(key: String): List<Int>? {
-        return try {
+    fun getIntList(key: String): List<Int>? = if (containsKey(key)) {
+        try {
             super.get(key)?.map { it.toInt() }
         } catch (ex: Exception) {
-            emptyList()
+            emptyList<Int>()
         }
-    }
+    } else null
 
-    fun getFloatList(key: String): List<Float>? {
-        return try {
+    fun getFloatList(key: String): List<Float>? = if (containsKey(key)) {
+        try {
             super.get(key)?.map { it.toFloat() }
         } catch (ex: Exception) {
-            emptyList()
+            emptyList<Float>()
         }
-    }
+    } else null
 
-    fun getDoubleList(key: String): List<Double>? {
-        return try {
+    fun getDoubleList(key: String): List<Double>? = if (containsKey(key)) {
+        try {
             super.get(key)?.map { it.toDouble() }
         } catch (ex: Exception) {
-            emptyList()
+            emptyList<Double>()
         }
-    }
+    } else null
 
     fun getBooleanList(key: String): List<Boolean>? = if (containsKey(key)) {
         super.get(key)?.map { !it.equals("false", true) && !it.equals("0", true) } ?: emptyList()
