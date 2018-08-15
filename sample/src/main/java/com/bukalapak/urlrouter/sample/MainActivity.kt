@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 .addExpression("second.mysite.com")
                 .setPostfixes(listOf("/*", "", ":<port:[0-9]+>/*", ":<port:[0-9]+>"))
                 // https://second.mysite.com/about
-                .addPath("/about", {
+                .addPaths(listOf("/about","/aboutme"), {
                     displayResult("Open second about page")
                 })
                 // https://second.mysite.com/promo/tas-keren-pria
