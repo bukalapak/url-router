@@ -80,9 +80,11 @@ class Router {
                 if (routerMap.postfixes.isEmpty()) 1 else routerMap.postfixes.size
 
         val pattern = mutableListOf<String>()
-        routerMap.prefixes.forEach { prefix ->
+        val prefixes = if (!routerMap.prefixes.isEmpty()) routerMap.prefixes else listOf("")
+        val postfixes = if (!routerMap.postfixes.isEmpty()) routerMap.postfixes else listOf("")
+        prefixes.forEach { prefix ->
             routerMap.expressions.forEach { expression ->
-                routerMap.postfixes.forEach { postfix ->
+                postfixes.forEach { postfix ->
                     pattern.add(prefix.nullToEmpty() + expression + postfix.nullToEmpty())
                     preProcessors = preProcessors.plus(Expression(
                             prefix.nullToEmpty() +
@@ -113,9 +115,11 @@ class Router {
                 if (routerMap.postfixes.isEmpty()) 1 else routerMap.postfixes.size
 
         val pattern = mutableListOf<String>()
-        routerMap.prefixes.forEach { prefix ->
+        val prefixes = if (!routerMap.prefixes.isEmpty()) routerMap.prefixes else listOf("")
+        val postfixes = if (!routerMap.postfixes.isEmpty()) routerMap.postfixes else listOf("")
+        prefixes.forEach { prefix ->
             routerMap.expressions.forEach { expression ->
-                routerMap.postfixes.forEach { postfix ->
+                postfixes.forEach { postfix ->
                     pattern.add(prefix.nullToEmpty() + expression + postfix.nullToEmpty())
                     preProcessors = preProcessors.plus(Expression(
                             prefix.nullToEmpty() +
