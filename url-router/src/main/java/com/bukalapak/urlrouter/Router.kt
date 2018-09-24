@@ -180,7 +180,7 @@ class Router {
                     val processedUrl = Uri.parse(getUrlWithScheme(url)).path
 
                     // processedUrl == null means that the preMap won't be continued to map
-                    return if (processedUrl != null && !processedUrl.equals("") && !processedUrl.equals("/")) {
+                    return if (processedUrl != null) {
                         routeUrl(context, url, processedUrl, interceptor, args, it.pattern)
                     } else {
                         Log.i(TAG, "Routing url " + url + " using " + it.pattern)
