@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/mrhabibi/maven/url-router/images/download.svg) ](https://bintray.com/mrhabibi/maven/url-router/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/mrhabibi/maven/url-router/images/download.svg?version=1.1.6) ](https://bintray.com/mrhabibi/maven/url-router/1.1.6/link)
 
 # URL Router
 A wrapper for easily routing URL on Android
