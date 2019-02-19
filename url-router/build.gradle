@@ -15,7 +15,7 @@ ext {
     siteUrl = 'https://github.com/bukalapak/url-router'
     gitUrl = 'https://github.com/bukalapak/url-router.git'
 
-    libraryVersion = '1.2.4'
+    libraryVersion = '1.2.5'
 
     developerId = 'mrhabibi'
     developerName = 'Muhammad Rizky Habibi'
