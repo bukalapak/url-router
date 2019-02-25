@@ -1,8 +1,12 @@
 apply plugin: 'java-library'
 
+repositories {
+    jcenter()
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':lib_deeplinkvalidator')
+    implementation 'com.google.code.gson:gson:2.8.5'
 }
 
 sourceCompatibility = "7"

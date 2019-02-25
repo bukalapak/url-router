@@ -1,4 +1,4 @@
-package com.bukalapak.deeplinkvalidator;
+package com.bukalapak.lib_deeplinkvalidator;
 
 import com.google.gson.annotations.SerializedName;
 
