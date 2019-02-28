@@ -1,4 +1,4 @@
-package com.bukalapak.lib_deeplinkvalidator;
+package com.bukalapak.neovalidator;
 
 import com.google.gson.Gson;
 
@@ -10,11 +10,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class DeeplinkValidator {
+public class NeoDeeplinkValidator {
+    public static void main(String[] args) {
+        check(args[0], args[1], new OnDeeplinkCheckListener() {
+            @Override
+            public void onDeeplinkValid(String key) {
+                System.out.println("VALID JSON, key: " + key);
+                System.exit(0);
+            }
+
+            @Override
+            public void onDeeplinkInvalid(Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        });
+    }
+
     public static void check(String key, String filePath, OnDeeplinkCheckListener listener) {
         File file = new File(filePath);
         switch (key) {
-            case "new-dynamic-deeplink":
+            case "dynamic-deeplink":
                 parseFileV1(key, file, listener);
                 break;
             case "dynamic-deeplink-v2":
@@ -49,7 +65,7 @@ public class DeeplinkValidator {
             for (String key : keys) {
                 DynamicDeeplink.DeeplinkMap map = result.deeplink.get(key).map;
                 if (map.expressions == null) {
-                    listener.onDeeplinkInvalid(new NullPointerException("NullPointerException: " + key + "map expressions"));
+                    listener.onDeeplinkInvalid(new NullPointerException("NullPointerException: "+ key + "map expressions" ));
                 }
 
                 List<String> keyPaths = collectKey(result.deeplink.get(key).path);
@@ -81,7 +97,7 @@ public class DeeplinkValidator {
             DynamicDeeplink.DynamicDeeplinkV1 result = gson.fromJson(br, DynamicDeeplink.DynamicDeeplinkV1.class);
 
             if (result == null) {
-                listener.onDeeplinkInvalid(new NullPointerException("NullPointerException: new-dynamic-deeplink"));
+                listener.onDeeplinkInvalid(new NullPointerException("NullPointerException: dynamic-deeplink"));
                 return;
             }
             if (result.map == null) {
@@ -120,8 +136,7 @@ public class DeeplinkValidator {
     }
 
     private static void checkValue(String key, Map<String, String> map) throws NullPointerException, IllegalArgumentException {
-        if (map == null)
-            throw new NullPointerException("NullPointerException " + key + " expression");
+        if (map == null) throw new NullPointerException("NullPointerException " + key + " expression");
         List<String> list = new ArrayList<>(map.values());
         for (String aList : list) {
             if (aList.contains("//")) {

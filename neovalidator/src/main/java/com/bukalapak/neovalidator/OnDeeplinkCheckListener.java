@@ -1,4 +1,4 @@
-package com.bukalapak.lib_deeplinkvalidator;
+package com.bukalapak.neovalidator;
 
 public interface OnDeeplinkCheckListener {
     void onDeeplinkValid(String key);
