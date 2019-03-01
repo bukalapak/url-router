@@ -1,4 +1,5 @@
-[ ![Download](https://api.bintray.com/packages/mrhabibi/maven/url-router/images/download.svg?version=1.1.6) ](https://bintray.com/mrhabibi/maven/url-router/1.1.6/link)
+> DEPRECATION WARNING!
+> This project has been deprecated. Please visit [Neuro project](https://github.com/bukalapak/neuro) as the next generation of URL Router with a lot of performance improvements.
 
 # URL Router
 A wrapper for easily routing URL on Android
@@ -106,6 +107,8 @@ val nonloginUserRouter = Router()
 ## Installation
 
 ### Gradle
+
+[ ![Download](https://api.bintray.com/packages/mrhabibi/maven/url-router/images/download.svg?version=1.1.6) ](https://bintray.com/mrhabibi/maven/url-router/1.1.6/link)
 
 Add this line in your `build.gradle` file:
 
