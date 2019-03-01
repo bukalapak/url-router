@@ -1,4 +1,4 @@
-> DEPRECATION WARNING!
+> **DEPRECATION WARNING!**
 > This project has been deprecated. Please visit [Neuro project](https://github.com/bukalapak/neuro) as the next generation of URL Router with a lot of performance improvements.
 
 # URL Router
