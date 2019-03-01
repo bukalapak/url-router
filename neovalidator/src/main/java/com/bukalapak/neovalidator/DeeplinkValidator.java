@@ -26,7 +26,7 @@ public class DeeplinkValidator {
             case "dynamic-deeplink-v2":
                 return checkV2(configJson, listener);
             default:
-                invokeInvalidIfListenerNotNull(listener, new IllegalArgumentException("config id not found"));
+                invokeInvalidIfListenerNotNull(listener, new IllegalArgumentException("configid not found"));
                 return false;
         }
     }
@@ -87,9 +87,16 @@ public class DeeplinkValidator {
                 return false;
             }
 
-            List<String> keys = collectKey(result.map);
-            for (String key : keys) {
+            List<String> mapKeys = collectKey(result.map);
+            for (String key : mapKeys) {
                 checkValue(key, result.map.get(key).expressions);
+            }
+
+            List<String> premapKeys = collectKey(result.premap);
+            for (String key : premapKeys) {
+                if (result.premap.get(key).expressions == null){
+                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException " + key + " expressions"));
+                }
             }
             invokeValidIfListenerNotNull(listener);
             return true;
@@ -108,7 +115,7 @@ public class DeeplinkValidator {
     }
 
     private static void checkValue(String key, Map<String, String> map) throws NullPointerException, IllegalArgumentException {
-        if (map == null) throw new NullPointerException("NullPointerException " + key + " expression");
+        if (map == null) throw new NullPointerException("NullPointerException " + key + " expressions");
         List<String> list = new ArrayList<>(map.values());
         for (String aList : list) {
             if (aList.contains("//")) {
