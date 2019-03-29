@@ -50,15 +50,33 @@ public class DeeplinkValidator {
             }
             for (String key : keys) {
                 DynamicDeeplink.DeeplinkMap map = result.deeplink.get(key).map;
-                if (map.expressions == null) {
-                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + "map expressions"));
+                DynamicDeeplink.DeeplinkRoot root = result.deeplink.get(key).root;
+
+                if (map == null && root == null) {
+                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " map or root"));
+                    return false;
+                }
+                if (map != null && (map.expressions == null || map.expressions.isEmpty())) {
+                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " map expressions"));
+                    return false;
+                }
+                if (root != null && root.hosts == null && root.schemes == null) {
+                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " root hosts or schemes"));
+                    return false;
+                }
+                if (root != null && root.hosts != null && root.hosts.isEmpty()) {
+                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " root hosts"));
+                    return false;
+                }
+                if (root != null && root.schemes != null && root.schemes.isEmpty()) {
+                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " root schemes"));
                     return false;
                 }
 
                 List<String> keyPaths = collectKey(result.deeplink.get(key).path);
                 if (keyPaths != null) {
                     for (String keyPath : keyPaths) {
-                        checkValue(keyPath, result.deeplink.get(key).path.get(keyPath).expressions);
+                        checkValue(key, keyPath, result.deeplink.get(key).path.get(keyPath).expressions);
                     }
                 }
             }
@@ -89,13 +107,14 @@ public class DeeplinkValidator {
 
             List<String> mapKeys = collectKey(result.map);
             for (String key : mapKeys) {
-                checkValue(key, result.map.get(key).expressions);
+                checkValue("map", key, result.map.get(key).expressions);
             }
 
             List<String> premapKeys = collectKey(result.premap);
             for (String key : premapKeys) {
-                if (result.premap.get(key).expressions == null){
+                if (result.premap.get(key).expressions == null || result.premap.get(key).expressions.isEmpty()) {
                     invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException " + key + " expressions"));
+                    return false;
                 }
             }
             invokeValidIfListenerNotNull(listener);
@@ -114,12 +133,13 @@ public class DeeplinkValidator {
         }
     }
 
-    private static void checkValue(String key, Map<String, String> map) throws NullPointerException, IllegalArgumentException {
-        if (map == null) throw new NullPointerException("NullPointerException " + key + " expressions");
+    private static void checkValue(String key, String keyPath, Map<String, String> map) throws NullPointerException, IllegalArgumentException {
+        if (map == null || map.isEmpty())
+            throw new NullPointerException("NullPointerException " + key + " " + keyPath + " expressions");
         List<String> list = new ArrayList<>(map.values());
         for (String aList : list) {
             if (aList.contains("//")) {
-                throw new IllegalArgumentException("Illegal expressions " + key + " : " + aList);
+                throw new IllegalArgumentException("Illegal expressions " + key + " " + keyPath + " : " + aList);
             }
         }
     }
