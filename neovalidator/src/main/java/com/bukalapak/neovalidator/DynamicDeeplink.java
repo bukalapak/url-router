@@ -23,6 +23,9 @@ class DynamicDeeplink {
         DeeplinkMap map;
         @SerializedName("path")
         Map<String, DeeplinkPath> path;
+        @SerializedName("root")
+        DeeplinkRoot root;
+
     }
 
     class DeeplinkMap {
@@ -37,5 +40,14 @@ class DynamicDeeplink {
     class DeeplinkPath {
         @SerializedName("expressions")
         Map<String, String> expressions;
+    }
+
+    class DeeplinkRoot {
+        @SerializedName("schemes")
+        Map<String, String> schemes;
+        @SerializedName("hosts")
+        Map<String, String> hosts;
+        @SerializedName("ports")
+        Map<String, Integer> ports;
     }
 }
