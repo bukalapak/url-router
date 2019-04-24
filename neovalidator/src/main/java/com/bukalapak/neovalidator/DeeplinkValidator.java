@@ -55,19 +55,15 @@ public class DeeplinkValidator {
             for (String key : keys) {
                 DynamicDeeplink.DeeplinkRoot baseUrl = result.deeplinks.get(key).baseUrl;
 
-                if (baseUrl == null) {
-                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " base-url"));
-                    return false;
-                }
-                if (baseUrl.hosts == null && baseUrl.schemes == null) {
+                if (baseUrl != null && baseUrl.hosts == null && baseUrl.schemes == null) {
                     invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " base-url hosts or schemes"));
                     return false;
                 }
-                if (baseUrl.hosts != null && baseUrl.hosts.isEmpty()) {
+                if (baseUrl != null && baseUrl.hosts != null && baseUrl.hosts.isEmpty()) {
                     invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " base-url hosts"));
                     return false;
                 }
-                if (baseUrl.schemes != null && baseUrl.schemes.isEmpty()) {
+                if (baseUrl != null && baseUrl.schemes != null && baseUrl.schemes.isEmpty()) {
                     invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " base-url schemes"));
                     return false;
                 }
