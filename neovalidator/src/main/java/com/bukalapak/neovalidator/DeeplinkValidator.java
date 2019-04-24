@@ -14,6 +14,8 @@ public class DeeplinkValidator {
                 return checkV1(configJson, null);
             case "dynamic-deeplink-v2":
                 return checkV2(configJson, null);
+            case "dynamic-deeplink-v3":
+                return checkV3(configJson, null);
             default:
                 return false;
         }
@@ -25,9 +27,59 @@ public class DeeplinkValidator {
                 return checkV1(configJson, listener);
             case "dynamic-deeplink-v2":
                 return checkV2(configJson, listener);
+            case "dynamic-deeplink-v3":
+                return checkV3(configJson, listener);
             default:
-                invokeInvalidIfListenerNotNull(listener, new IllegalArgumentException("configid not found"));
+                invokeInvalidIfListenerNotNull(listener, new IllegalArgumentException("config id not found"));
                 return false;
+        }
+    }
+
+    private static boolean checkV3(String configJson, OnDeeplinkCheckListener listener) {
+        try {
+            DynamicDeeplink.DynamicDeeplinkV3 result = new Gson().fromJson(configJson, DynamicDeeplink.DynamicDeeplinkV3.class);
+            if (result == null) {
+                invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: dynamic-deeplink-v3"));
+                return false;
+            }
+            if (result.deeplinks == null) {
+                invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: deeplinks:{"));
+                return false;
+            }
+
+            List<String> keys = collectKey(result.deeplinks);
+            if (keys.size() < 1 || keys.size() == 1 && keys.get(0).equals("deeplinks")) {
+                invokeInvalidIfListenerNotNull(listener, new IllegalArgumentException("IllegalArgumentException: deeplinks:{"));
+                return false;
+            }
+            for (String key : keys) {
+                DynamicDeeplink.DeeplinkRoot baseUrl = result.deeplinks.get(key).baseUrl;
+
+                if (baseUrl != null && baseUrl.hosts == null && baseUrl.schemes == null) {
+                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " base-url hosts or schemes"));
+                    return false;
+                }
+                if (baseUrl != null && baseUrl.hosts != null && baseUrl.hosts.isEmpty()) {
+                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " base-url hosts"));
+                    return false;
+                }
+                if (baseUrl != null && baseUrl.schemes != null && baseUrl.schemes.isEmpty()) {
+                    invokeInvalidIfListenerNotNull(listener, new NullPointerException("NullPointerException: " + key + " base-url schemes"));
+                    return false;
+                }
+
+                List<String> keyPaths = collectKey(result.deeplinks.get(key).paths);
+                if (keyPaths != null) {
+                    for (String keyPath : keyPaths) {
+                        checkValue(key, keyPath, result.deeplinks.get(key).paths.get(keyPath).patterns);
+                    }
+                }
+            }
+            invokeValidIfListenerNotNull(listener);
+            return true;
+        } catch (Exception e) {
+            invokeInvalidIfListenerNotNull(listener, e);
+            return false;
         }
     }
 
@@ -135,11 +187,14 @@ public class DeeplinkValidator {
 
     private static void checkValue(String key, String keyPath, Map<String, String> map) throws NullPointerException, IllegalArgumentException {
         if (map == null || map.isEmpty())
-            throw new NullPointerException("NullPointerException " + key + " " + keyPath + " expressions");
+            throw new NullPointerException("NullPointerException " + key + " " + keyPath);
         List<String> list = new ArrayList<>(map.values());
         for (String aList : list) {
             if (aList.contains("//")) {
-                throw new IllegalArgumentException("Illegal expressions " + key + " " + keyPath + " : " + aList);
+                throw new IllegalArgumentException("IllegalArgumentException " + key + " " + keyPath + " : " + aList);
+            }
+            if (aList.length() > 0 && aList.charAt(0) != '/') {
+                throw new IllegalArgumentException("IllegalArgumentException " + key + " " + keyPath + " : " + aList);
             }
         }
     }

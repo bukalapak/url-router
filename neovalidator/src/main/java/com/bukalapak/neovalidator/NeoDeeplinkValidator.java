@@ -17,14 +17,14 @@ public class NeoDeeplinkValidator {
             DeeplinkValidator.validateDeeplinkConfig(configId, json, new OnDeeplinkCheckListener() {
                 @Override
                 public void onDeeplinkValid() {
-                    System.out.println("VALID JSON, configid: " + configId);
+                    System.out.println("VALID JSON, config id: " + configId);
                     System.exit(0);
                 }
 
                 @Override
                 public void onDeeplinkInvalid(Exception e) {
-                    System.err.println("INVALID JSON, configid: " + configId);
-                    e.printStackTrace();
+                    System.err.println("INVALID JSON, config id: " + configId);
+                    System.err.println(e.getMessage());
                     System.exit(1);
                 }
             });
