@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public class DeeplinkValidator {
-    public static boolean validateDeeplinkConfig(@NotNull String idConfig, @NotNull String configJson) {
-        switch (idConfig) {
+    public static boolean validateDeeplinkConfig(@NotNull String validatorName, @NotNull String configJson) {
+        switch (validatorName) {
             case "dynamic-deeplink":
                 return checkV1(configJson, null);
             case "dynamic-deeplink-v2":
@@ -21,8 +21,8 @@ public class DeeplinkValidator {
         }
     }
 
-    public static boolean validateDeeplinkConfig(@NotNull String idConfig, @NotNull String configJson, OnDeeplinkCheckListener listener) {
-        switch (idConfig) {
+    public static boolean validateDeeplinkConfig(@NotNull String validatorName, @NotNull String configJson, OnDeeplinkCheckListener listener) {
+        switch (validatorName) {
             case "dynamic-deeplink":
                 return checkV1(configJson, listener);
             case "dynamic-deeplink-v2":
@@ -30,7 +30,7 @@ public class DeeplinkValidator {
             case "dynamic-deeplink-v3":
                 return checkV3(configJson, listener);
             default:
-                invokeInvalidIfListenerNotNull(listener, new IllegalArgumentException("config id not found"));
+                invokeInvalidIfListenerNotNull(listener, new IllegalArgumentException("validator name not found"));
                 return false;
         }
     }
