@@ -193,7 +193,7 @@ public class DeeplinkValidator {
             if (aList.contains("//")) {
                 throw new IllegalArgumentException("IllegalArgumentException " + key + " " + keyPath + " : " + aList);
             }
-            if (aList.length() > 0 && aList.charAt(0) != '/') {
+            if (aList.length() > 0 && aList.charAt(0) != '/' && !aList.equals("[deleted]")) {
                 throw new IllegalArgumentException("IllegalArgumentException " + key + " " + keyPath + " : " + aList);
             }
         }
